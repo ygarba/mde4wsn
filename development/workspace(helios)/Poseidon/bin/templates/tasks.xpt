@@ -1,0 +1,260 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«REM»«FOREACH __ownedMember.typeSelect(wsn::Task).select(e|e.j_deleted != 1) AS e-»«ENDREM»
+«FOREACH __ownedMember.typeSelect(wsn::Task) AS e-»
+«FILE "task_" + e.getName() + ".c"»
+/****************************************************
+* Generated code for task -> «e.getName()» 
+*****************************************************/	
+#include "contiki.h"
+#include <stdio.h>
+#include "net/netstack.h"
+#include "net/rime.h"
+
+#include "wsn.h"
+//#include "runtime.h"	//included by wsn.h already
+#include "qepn.h"
+#include "dev/leds.h"
+//#include "qpn_port.h"
+//#include "bsp.h"
+
+#define DEBUG 0
+#if DEBUG
+#include <stdio.h>
+#define PRINTF(...) printf(__VA_ARGS__)
+#else
+#define PRINTF(...)
+#endif
+
+enum «e.behaviorName-»Events {
+    OFFSET_EVT = Q_USER_SIG,
+    OFFSET2_EVT = 150,
+	RUNTIME_EVENT_TIMER = PROCESS_EVENT_TIMER, 
+	RUNTIME_EVENT_UPDATEPOOL = 250,
+	RUNTIME_EVENT_REMOTETRIGGER,
+    RUNTIME_EVENT_NONE				//for automatic transition after entry action completion
+};
+
+typedef struct «e.behaviorName.toUpperCase()»Tag {
+    QFsm super;
+    void *data;	//data extracted from event and passed to SM
+    uint8_t code;	//code for remote trig
+} «e.behaviorName»;		//derived from QFsm
+
+«e.behaviorName» «e.behaviorName.toLowerCase()»;		//SM object
+
+/*---------------- Process Declaration -------------------*/
+PROCESS(«e.getName()-»_process, "«e.getName()-»");
+//AUTOSTART_PROCESSES(&«e.getName()-»_process);
+/*--------------------------------------------------------*/
+
+/*------------------- helper functions -------------------*/
+//Timers declare
+«FOREACH e.getOutgoingRelationships().typeSelect(Timing) AS tm-»
+static struct etimer «tm.timer.getName()-»;
+void Start_«e.getName()-»_Timer(uint16_t time)
+{
+   PROCESS_CONTEXT_BEGIN(&«e.getName()-»_process);
+   etimer_set(&«tm.timer.getName()-», CLOCK_SECOND*time);
+   PROCESS_CONTEXT_END(&«e.getName()-»_process);
+}
+«ENDFOREACH»
+/*--------------------------------------------------------*/
+
+//SM prototypes
+void «e.behaviorName»_ctor(«e.behaviorName-» *me);
+static QState «e.behaviorName»_initial(«e.behaviorName» *me);
+«REM»«EXPAND _smPrototypes FOR e.behavior-»«ENDREM»
+«EXPAND _smPrototypes(e) FOR eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0)-»
+
+//State Definations
+void «e.behaviorName»_ctor(«e.behaviorName» *me){
+    QFsm_ctor(&me->super, (QStateHandler)&«e.behaviorName»_initial);
+}
+
+QState «e.behaviorName»_initial(«e.behaviorName» *me){ 
+    «FOREACH eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0).eContents.typeSelect(InitialState).getOutgoingRelationships().typeSelect(Transition) AS st-»
+    «REM» ToDo: fix -> return Q_TRAN(&«st.transitionTo.getName()-»); «ENDREM»
+    «ENDFOREACH-»
+    return Q_TRAN(&«e.behaviorName-»_«eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0).eContents.typeSelect(InitialState).get(0).getOutgoingRelationships().typeSelect(Transition).get(0).transitionTo.getName()-»);
+}
+
+«EXPAND _smFunctions(e) FOR eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0)-»
+
+/*------------------ Process Def -------------------------*/
+PROCESS_THREAD(«e.getName()-»_process, ev, evtData)
+{
+	PROCESS_BEGIN();
+	void* data;
+	uint8_t code;
+	
+  	«FOREACH e.getOutgoingRelationships().typeSelect(Sensing).sensor AS s-»
+	«s.id.toUpperCase()»_Configure();	//sensor activated
+	«ENDFOREACH-»
+	«FOREACH e.getOutgoingRelationships().typeSelect(Actuating).actuator AS s-»
+	«s.id.toUpperCase()»_Configure();	//actuator activated
+	«ENDFOREACH-»
+  	«e.behaviorName-»_ctor(&«e.behaviorName.toLowerCase()-»);
+  	QFsm_init((QFsm *)&«e.behaviorName.toLowerCase()-»); //trigger initial transistion in this object
+   
+    //******************* where to put this?????????????????????
+    rimeaddr_copy(&(sharedData.addr), &rimeaddr_node_addr);
+    «FOREACH __ownedMember.typeSelect(wsn::Data).select(e|e.shared == true) AS d-»
+    «FOREACH d.variable AS v-»
+    «d.getName()».«v.getName()» = «v.initial»;
+    «ENDFOREACH-»
+    sharedData.«d.getName()» = «d.getName()»;
+    «ENDFOREACH-»
+    remoteTrig.sharedData = sharedData;
+    //******************* where to put this?????????????????????
+  	
+  	while(1){
+		PROCESS_WAIT_EVENT();
+		
+		//check whether it is remote trig event. If yes, then split data for code and shareddata
+		if (ev == RUNTIME_EVENT_REMOTETRIGGER) {
+			code = ((struct remoteTrig*)evtData)->code;
+			data = &(((struct remoteTrig*)evtData)->sharedData);
+		}
+		else
+		{
+			data = evtData;
+			code = 0;		//means non remote trig exec
+		}
+		
+		//printf("«e.getName()» event dispatched ...\n\r");
+		(&«e.behaviorName.toLowerCase()»)->data = data;	//insert event data pointer in sm object
+		(&«e.behaviorName.toLowerCase()»)->code = code;
+		Q_SIG(&«e.behaviorName.toLowerCase()») = ev;
+		QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		
+		/*
+		* The reason for this secondary dispatch is for NONE event.
+		* The number of if's detetmines the length of chain of NONE events possible. Now two!
+		*/
+		if (Q_SIG(&«e.behaviorName.toLowerCase()») == RUNTIME_EVENT_NONE) { //means completion of entry action automatically triggers transition, i.e. NULL event
+		  QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		}
+		
+		if (Q_SIG(&«e.behaviorName.toLowerCase()») == RUNTIME_EVENT_NONE) { //means completion of entry action automatically triggers transition, i.e. NULL event
+		  QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		}
+  }
+
+  PROCESS_END();
+}
+/*--------------------------------------------------------*/
+«ENDFILE»
+«ENDFOREACH»
+«ENDDEFINE»
+-------------------------------------------------------
+/***** StateMachine *****/
+«DEFINE _smPrototypes(wsn::Task curTask) FOR wsn::StateMachine-»
+«FOREACH this.eContents.typeSelect(State).reject(e|e.getName().contains("Initial") || e.getName().contains("Final")) AS st-»
+static QState «this.getName()-»_«st.getName()-»(«this.getName()-» *me);
+«ENDFOREACH-»
+«ENDDEFINE»
+
+«DEFINE _smFunctions(wsn::Task curTask) FOR wsn::StateMachine-»
+«FOREACH this.eContents.typeSelect(State).reject(e|e.getName().contains("Initial") || e.getName().contains("Final")) AS st-»
+QState «this.getName()-»_«st.getName()-»(«this.getName()-» *me){
+	switch (Q_SIG(me)) {
+	        case Q_ENTRY_SIG: {
+	        	
+	        	«FOREACH eRootContainer.eAllContents.typeSelect(Activity).select(e|e.getName() == st.entry) AS act-»      			
+	        	«FOREACH act.eAllContents.typeSelect(Action) AS action-»
+	        	«EXPAND _activityActions(curTask) FOR action-»	       	        	
+	        	«ENDFOREACH-»        	
+	        	«ENDFOREACH-»
+	
+	        	«IF st.getOutgoingRelationships().typeSelect(Transition).exists(e|e.triggerevent == wsn::EventType::none)-»
+	        	Q_SIG(&«this.getName().toLowerCase()») = RUNTIME_EVENT_NONE;
+	        	«ENDIF-»       	 
+	            
+	            return Q_HANDLED();
+	        }
+	        case Q_EXIT_SIG: {	           
+	        	
+	        	«FOREACH eRootContainer.eAllContents.typeSelect(Activity).select(e|e.getName() == st.exit) AS act-»     			    
+	        	«FOREACH act.eAllContents.typeSelect(Action) AS action-»
+	        	«EXPAND _activityActions(curTask) FOR action-»	       	        	
+	        	«ENDFOREACH-»        	
+	        	«ENDFOREACH-»
+	        		        		            
+	            return Q_HANDLED();
+	        }
+	 		«FOREACH st.getOutgoingRelationships().typeSelect(Transition) AS tran-» 
+	        case «getEventName(tran.triggerevent)-»: {
+	            return Q_TRAN(&«this.getName()-»_«tran.transitionTo.getName()-»);
+	        }    
+	 		«ENDFOREACH-»
+	    }
+    return Q_IGNORED(); 
+}
+«ENDFOREACH-»
+«ENDDEFINE»
+/***** StateMachine Ends *****/
+
+/***** Entry/Exit Behavior Actions *****/
+«DEFINE _activityActions(wsn::Task curTask) FOR wsn::Action-»	
+		«IF this.metaType == wrapper::WrappedTimingAction-»
+				Start_«curTask.getName()-»_Timer(«this.time-»);
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedUpdatePoolAction-»
+				«REM»runtime_UpdatePool(&«this.data-»); «ENDREM»
+				runtime_UpdatePool();
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedSensingAction-»
+				«this.sensorId-»_Get(&«this.data»);	//sensor asked to get new data and place it in buffer
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedActuatingAction-»
+				«this.actuatorId-»_Set(«this.data.toUpperCase()-»_Data);	//actuator asked to update
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedGetNodeAction-»
+			«IF this.query.toLowerCase().contains('battery')-»
+				facts_GetNode_Battery(«getNodeParameters(this.query)»);	//get a neighbor node id based on the query and store it in the global var 'targetAddr'
+			«ENDIF-»
+			«IF this.query.toLowerCase().contains('link')-»	
+				facts_GetNode_Link(«getNodeParameters(this.query)»);	
+			«ENDIF-»
+			«IF this.query.toLowerCase().contains('hop')-»	
+				facts_GetNode_Hop(«getNodeParameters(this.query)»);	
+			«ENDIF-»
+			«IF this.query.toLowerCase().contains('ch')-»	
+				facts_GetNode_Ch(«getNodeParameters(this.query)»);	
+			«ENDIF-»
+				
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedGetDataAction-»
+				data_GetData_«getVarName(this.query)»(«getDataParameters(this.query)»);	//get a neighbor node id based on the query and store it in the global var 'remoteNodeId'
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedRemoteTriggerAction-»												
+			«IF this.data == wsn::RemoteTriggerDataType::transit-»
+				runtime_RemoteTrigger(«this.code», me->data);		//sending remote event to -> 'targetAddr'. Call GetNode (query) prior to this call				
+			«ELSE»
+				runtime_RemoteTrigger(«this.code», &sharedData);
+			«ENDIF»
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedOpaqueAction-»
+			«IF this.type == wsn::OpaqueType::file»
+			«LET this.file AS src-»
+				«IF this.language == wsn::Languages::ALF-»
+				«getOpaqueAL(src)»
+				«ENDIF-»
+				«IF this.language == wsn::Languages::C-»
+				«getOpaqueC(src)»
+				«ENDIF-»
+				«IF this.language == wsn::Languages::Java-»
+				«getOpaqueJava(src)»
+				«ENDIF-»
+			«ENDLET-»
+			«ELSE»
+				«this.code»;
+			«ENDIF»
+		«ENDIF-»
+«ENDDEFINE»
+/***** Entry/Exit Behavior Actions Ends *****/
+ -------------------------------------------------
+

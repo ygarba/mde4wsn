@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ASCII"?>
+<dsl:PoseidonCoreRootElement xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dsl="http://www.gentleware.com/poseidon/dsl/1.0" xmlns:wrapper="http://www.gentleware.com/poseidon/dsl/wrapper/1.0" __uuid="model" __poseidonName="model" __poseidonNamespace="true">
+  <j_diagramHolder __uuid="68019949-def0-463d-81a9-8ebb36b0ef16">
+    <diagram __uuid="6e962c8d-0188-4972-b6e9-bc94ef5d9275" __poseidonName="Diagram_1" type=""/>
+    <diagram __uuid="56519cbd-5aa8-4f04-b473-56ecd3aa79ca" __poseidonName="PlatformDiagram_2" lastFigureId="20" saveTime="Sun May 3, 2015 at 05:52:48 AST" savedBy="Poseidon" type="Platform">
+      <figures __uuid="52e62535-b4b5-4223-be1a-7f0cb8f750f6" id="19" recreator="ActivityEdge" anchor1Id="6" anchor2Id="7" virtualPoint="466 325" points="2 461.5 321 483.9 341" show="true" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.7">
+        <figures __uuid="0e6197b0-3c44-406d-b543-f69e8d7250a8" id="19_M" recreator="Linked Text" containedName="text" text="ActivityEdge_4" show="false" point="456 315" dimensions="79.4 14.7">
+          <properties __uuid="cf3d9900-4315-4fcc-8aea-61bb7b7e7109" __poseidonName="alwaysShown" value="false"/>
+          <properties __uuid="14093f96-0184-46a6-ac06-ac3a080a8515" __poseidonName="majorPt" value="0"/>
+          <properties __uuid="6b943700-df1d-40f0-ac6b-683661859d1b" __poseidonName="suppress" value="false"/>
+        </figures>
+        <properties __uuid="d0ec457a-fa97-433f-a839-263e00a9c743" __poseidonName="color" value="0 0 0"/>
+        <properties __uuid="9685be29-1d91-4a9f-b531-b73e7ae5230c" __poseidonName="fill" value="0 0 0 0"/>
+        <properties __uuid="099b7782-3317-466a-aac6-a7d553539c0b" __poseidonName="curved" value="false"/>
+      </figures>
+      <figures __uuid="96948df1-9c27-48bc-9602-e4e104a8cb55" id="16" recreator="ActivityEdge" anchor1Id="5" anchor2Id="6" virtualPoint="382 288" points="2 356 288 408 288" show="true" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.6">
+        <figures __uuid="ea62a9f3-5e1e-4377-8d53-2f3199387f39" id="16_M" recreator="Linked Text" containedName="text" text="ActivityEdge_3" show="false" point="368 271" dimensions="79.4 14.7">
+          <properties __uuid="61975fc6-498c-4b91-a30b-555404fcad1c" __poseidonName="alwaysShown" value="false"/>
+          <properties __uuid="b3cffb4f-e18b-497c-ab73-67f079196648" __poseidonName="majorPt" value="0"/>
+          <properties __uuid="97e66779-7984-4f79-9ed5-d6bda641328a" __poseidonName="suppress" value="false"/>
+        </figures>
+        <properties __uuid="6ec4c29e-9cbb-45e9-b935-10163a4b9192" __poseidonName="color" value="0 0 0"/>
+        <properties __uuid="be19c025-eca1-49f7-98a6-babb106418cc" __poseidonName="fill" value="0 0 0 0"/>
+        <properties __uuid="95f79ee8-5543-4b3c-a3a0-8c2cb766939d" __poseidonName="curved" value="false"/>
+      </figures>
+      <figures __uuid="c9a6ef69-aa5b-4f5c-a4ef-37bd8cae4ab7" id="13" recreator="ActivityEdge" anchor1Id="4" anchor2Id="5" virtualPoint="266 246" points="2 237.1 235.4 296.1 257.1" show="true" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.5">
+        <figures __uuid="a7a48908-ddda-4ea0-ad7a-2ebac29ca8bd" id="13_M" recreator="Linked Text" containedName="text" text="ActivityEdge_2" show="false" point="252 231" dimensions="79.4 14.7">
+          <properties __uuid="34c63e47-e4b5-4d20-b5bf-45ebf1f4ca95" __poseidonName="alwaysShown" value="false"/>
+          <properties __uuid="126e1505-723c-4568-bfc7-d5a1f69623c1" __poseidonName="majorPt" value="0"/>
+          <properties __uuid="1ef12c87-116b-4976-8ad6-1287afda97c3" __poseidonName="suppress" value="false"/>
+        </figures>
+        <properties __uuid="3b21ad9b-83dc-4752-a659-53cc090cda61" __poseidonName="color" value="0 0 0"/>
+        <properties __uuid="899095b2-be03-4821-a832-d910dc97fa9b" __poseidonName="fill" value="0 0 0 0"/>
+        <properties __uuid="8afa718c-36db-4d4a-bf50-3436a95acae4" __poseidonName="curved" value="false"/>
+      </figures>
+      <figures __uuid="a6eae23f-b8d9-407a-b305-c45ae348c807" id="10" recreator="ActivityEdge" anchor1Id="3" anchor2Id="4" virtualPoint="170 203" points="2 145.1 188.5 176 206.5" show="true" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.4">
+        <figures __uuid="fb7a5942-3e30-442e-bcf7-8661df9b1c30" id="10_M" recreator="Linked Text" containedName="text" text="ActivityEdge_1" show="false" point="144 179" dimensions="79.4 14.7">
+          <properties __uuid="b5a71db6-2dab-4ec2-ad89-869c1e374e2d" __poseidonName="alwaysShown" value="false"/>
+          <properties __uuid="6fd61e56-50ee-4337-bdf4-47cf5911f8c6" __poseidonName="majorPt" value="0"/>
+          <properties __uuid="bd0a5877-51cb-4eef-b29c-1cf22165d6f1" __poseidonName="suppress" value="false"/>
+        </figures>
+        <properties __uuid="c85a89be-3c30-4505-9224-b675556418c2" __poseidonName="color" value="0 0 0"/>
+        <properties __uuid="60e64edb-f11d-4f6b-ae21-29ff9f6e4436" __poseidonName="fill" value="0 0 0 0"/>
+        <properties __uuid="60155c23-75fb-4752-9b4f-268c0da1e31c" __poseidonName="curved" value="false"/>
+      </figures>
+      <figures __uuid="26d9e68e-ae76-4625-bc9e-0f2de145630b" __poseidonName="Aspect_1" id="0" recreator="Aspect" containedName="" show="true" point="80 76" dimensions="448 312" subject="//@__ownedMember.1">
+        <figures __uuid="45904d3f-5ff8-4774-bf50-f6c2b46fe447" id="0_C" recreator="SimpleContainer" containedName="contents" show="true" point="80 98.7" dimensions="448 289.3" offset="4 4" min="0 0">
+          <figures __uuid="7d0ff6e1-781e-47f2-9a00-33a19c557137" __poseidonName="Advice_1" id="2" recreator="Advice" containedName="" show="true" point="104 144" dimensions="408 220" subject="//@__ownedMember.1/@__ownedMember.1">
+            <figures __uuid="8c9cc019-c657-4c7f-baa4-4b6cd4c2523d" id="2_C" recreator="SimpleContainer" containedName="contents" show="true" point="104 166.7" dimensions="408 197.3" offset="4 4" min="0 0">
+              <figures __uuid="449230f0-2679-4b40-a752-e0bbdb919587" id="3" recreator="InitialNode" containedName="" show="true" point="124 172" dimensions="20 20" subject="//@__ownedMember.1/@__ownedMember.1/@initialNode">
+                <figures __uuid="41fc155f-04b6-4bf4-86a1-985507933a80" id="3_C" recreator="SimpleContainer" containedName="contents" show="true" point="0 0" dimensions="0 0" offset="4 4" min="0 0">
+                  <properties __uuid="c9f86c81-735f-49a8-8a66-691f7e38107a" __poseidonName="deletedUuids" value=""/>
+                  <properties __uuid="0d3c60f3-a209-410b-a619-2c169464b6dc" __poseidonName="addedUuids" value=""/>
+                  <properties __uuid="87c46a99-0dcf-4a8a-849f-b8be80427b6e" __poseidonName="backdrop" value="false"/>
+                </figures>
+                <properties __uuid="21415161-8ab8-4ba6-9717-981ea5b9c1ed" __poseidonName="color" value="0 0 0"/>
+                <properties __uuid="6f66a9d6-375e-4145-bc0a-a6a37ee57cda" __poseidonName="fill" value="0 0 0"/>
+              </figures>
+              <figures __uuid="d7041cb0-c925-4c2d-9499-447517b47d42" id="7" recreator="FinalNode" containedName="" show="true" point="484 340" dimensions="20 20" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.3">
+                <figures __uuid="88fdc540-06bd-446a-a55e-e1314e834c46" id="7_C" recreator="SimpleContainer" containedName="contents" show="true" point="0 0" dimensions="0 0" offset="4 4" min="0 0">
+                  <properties __uuid="8834b2a6-29ae-4d67-bc5e-a704c33a40d3" __poseidonName="deletedUuids" value=""/>
+                  <properties __uuid="14a50a1b-1b34-4658-bc53-cb2bc0fbf9ab" __poseidonName="addedUuids" value=""/>
+                  <properties __uuid="61de1f51-0e0b-4c5b-9967-071af7c6e84e" __poseidonName="backdrop" value="false"/>
+                </figures>
+                <properties __uuid="4bc0be5e-1afa-4924-9284-eb69bf4350f9" __poseidonName="color" value="0 0 0"/>
+                <properties __uuid="995a1e85-b82d-4c58-8261-a88413679572" __poseidonName="fill" value="0 0 0"/>
+              </figures>
+              <figures __uuid="d438441c-a54f-4809-b7c3-8457721bfbee" __poseidonName="ActuatingAction_1" id="6" recreator="ActuatingAction" containedName="" show="true" point="408 280" dimensions="60 40" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.2">
+                <figures __uuid="0ecea8d2-b927-4b19-94ec-7b5d048ffa0b" id="6_C" recreator="SimpleContainer" containedName="contents" show="true" point="0 0" dimensions="0 0" offset="4 4" min="0 0">
+                  <properties __uuid="efc1e779-2f8f-4c5f-adfd-9eed4e80019f" __poseidonName="deletedUuids" value=""/>
+                  <properties __uuid="3e930d7c-09ef-45e1-8b0d-1669c5153efd" __poseidonName="addedUuids" value=""/>
+                  <properties __uuid="cd2e414b-23d6-4749-8613-690118ac65ae" __poseidonName="backdrop" value="false"/>
+                </figures>
+                <properties __uuid="4d8fdcab-b50e-4bcc-920d-0a8c07704e8e" __poseidonName="color" value="0 0 0"/>
+                <properties __uuid="5db48c90-3f53-4384-a39d-2f44cc341ccd" __poseidonName="fill" value="255 255 255"/>
+              </figures>
+              <figures __uuid="76ce80fe-637a-40e8-9d05-821a47e7326f" __poseidonName="TimingAction_1" id="5" recreator="TimingAction" containedName="" show="true" point="296 248" dimensions="60 40" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.1">
+                <figures __uuid="e53ffb5c-0df7-4814-96f6-414310c5e2ec" id="5_C" recreator="SimpleContainer" containedName="contents" show="true" point="0 0" dimensions="0 0" offset="4 4" min="0 0">
+                  <properties __uuid="559a5452-6760-41c4-bc20-a94c23aed847" __poseidonName="deletedUuids" value=""/>
+                  <properties __uuid="6386d63a-7c62-4283-9774-49c9cfd050b3" __poseidonName="addedUuids" value=""/>
+                  <properties __uuid="4822170e-d06d-4abf-80dc-c33ff0e1ac52" __poseidonName="backdrop" value="false"/>
+                </figures>
+                <properties __uuid="0a0eec86-fe6b-41e1-b485-eacd443267c9" __poseidonName="color" value="0 0 0"/>
+                <properties __uuid="b6891daf-9316-4168-9987-d560102dd2ee" __poseidonName="fill" value="255 255 255"/>
+              </figures>
+              <figures __uuid="80059a26-f0fc-4d07-bc31-fa072995540a" __poseidonName="SensingAction_1" id="4" recreator="SensingAction" containedName="" show="true" point="176 204" dimensions="60 40" subject="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.0">
+                <figures __uuid="da504f05-3fb8-4c68-9618-ffc4df1bdada" id="4_C" recreator="SimpleContainer" containedName="contents" show="true" point="0 0" dimensions="0 0" offset="4 4" min="0 0">
+                  <properties __uuid="e2fcf5f7-a5f1-4014-9aea-c853aa101854" __poseidonName="deletedUuids" value=""/>
+                  <properties __uuid="39125d96-ab9b-410a-b035-0f98ae0b0446" __poseidonName="addedUuids" value=""/>
+                  <properties __uuid="35ce259f-d964-410b-9e41-f0bd705902c8" __poseidonName="backdrop" value="false"/>
+                </figures>
+                <properties __uuid="7137f286-72da-4156-8c3e-d309da3592e0" __poseidonName="color" value="0 0 0"/>
+                <properties __uuid="0a49735c-9121-4697-9c7f-4b4611fba3cb" __poseidonName="fill" value="255 255 255"/>
+              </figures>
+              <properties __uuid="5d5ec463-2c53-4bab-9319-cf32c9455fab" __poseidonName="deletedUuids" value=""/>
+              <properties __uuid="a451611b-1a11-47f5-af88-951d6cf1b386" __poseidonName="addedUuids" value=""/>
+              <properties __uuid="d3b6561e-998f-482d-9ce9-4f3e44de56fb" __poseidonName="backdrop" value="false"/>
+            </figures>
+            <properties __uuid="79cdd3de-5e95-45a0-8352-5a19655bbd99" __poseidonName="color" value="0 0 0"/>
+            <properties __uuid="f71cb126-f325-4ee4-ad04-d69800f06f41" __poseidonName="fill" value="255 255 255"/>
+            <properties __uuid="bad6ee07-f05e-47bd-9b73-dc7cbb5ee42b" __poseidonName="suppVis" value="false"/>
+            <properties __uuid="8404c593-7f5b-475d-84a6-9f3b2319585f" __poseidonName="showVis" value="false"/>
+          </figures>
+          <figures __uuid="296c2b13-2f06-4bd7-adc3-bfee536006c3" __poseidonName="Pointcut_1" id="1" recreator="Pointcut" containedName="" show="true" point="116 104" dimensions="140 22.7" subject="//@__ownedMember.1/@__ownedMember.0">
+            <figures __uuid="c0708dca-1320-4a9a-9b46-4f2652c6fe26" id="1_C" recreator="SimpleContainer" containedName="contents" show="true" point="116 126.7" dimensions="140 0" offset="4 4" min="0 0">
+              <properties __uuid="2f4b67ee-4d44-4056-8f56-dca4838163ed" __poseidonName="deletedUuids" value=""/>
+              <properties __uuid="24607b30-8f59-478b-a645-75091fcf398b" __poseidonName="addedUuids" value=""/>
+              <properties __uuid="30350018-25a9-48d4-90af-990bbd0a6a4c" __poseidonName="backdrop" value="false"/>
+            </figures>
+            <properties __uuid="7b7cfe39-9842-4bfb-b5e9-11cc0c53f439" __poseidonName="color" value="0 0 0"/>
+            <properties __uuid="f86e80dc-6fdc-4b2f-9fc3-037e22a52d8c" __poseidonName="fill" value="255 255 255"/>
+            <properties __uuid="b8243593-868b-4bf6-b574-718a24bc69a1" __poseidonName="suppVis" value="false"/>
+            <properties __uuid="eeb33e0d-f07a-4b70-8c06-68393e75b91e" __poseidonName="showVis" value="false"/>
+          </figures>
+          <properties __uuid="0e659ee8-5dae-49f0-ac3b-68428b031b8b" __poseidonName="deletedUuids" value=""/>
+          <properties __uuid="61ad9896-c7f2-4e39-a250-fcfbc5493172" __poseidonName="addedUuids" value=""/>
+          <properties __uuid="a2834151-5597-4ab7-914b-be9613306ac6" __poseidonName="backdrop" value="false"/>
+        </figures>
+        <properties __uuid="861f083e-b542-427e-9eac-e537cf8ab34a" __poseidonName="color" value="0 0 0"/>
+        <properties __uuid="b7583974-68cc-4c84-bd4f-27082214b763" __poseidonName="fill" value="255 255 255"/>
+        <properties __uuid="5ddb29e2-643d-430d-900c-62ebe82c1a94" __poseidonName="suppVis" value="false"/>
+        <properties __uuid="88c11874-51ab-4c84-9402-7de01d1d7d41" __poseidonName="showVis" value="false"/>
+      </figures>
+    </diagram>
+  </j_diagramHolder>
+  <__ownedMember xsi:type="wrapper:WrappedMetamodelElementSub" __uuid="PoseidonSubsHolder" __poseidonName="PoseidonSubsHolder" __poseidonNamespace="true"/>
+  <__ownedMember xsi:type="wrapper:WrappedAspect" __uuid="0654fa9b-316a-4cf1-94d1-f02c28478dd4" __poseidonName="Aspect_1" __poseidonNamespace="true" __poseidonRole="Aspect">
+    <__ownedMember xsi:type="wrapper:WrappedPointcut" expression="disp" __uuid="4fa06cf2-1917-4ecc-b3d7-bb8c614f22f0" __poseidonName="Pointcut_1" __poseidonRole="Pointcut"/>
+    <__ownedMember xsi:type="wrapper:WrappedAdvice" __uuid="a1b602b1-a087-4638-8540-60b9f3dca379" __poseidonName="Advice_1" __poseidonNamespace="true" __poseidonRole="Advice">
+      <initialNode xsi:type="wrapper:WrappedInitialNode" __uuid="c21ae79d-91e2-466e-a904-22857b96454c" __poseidonName="InitialNode_1" __poseidonRole="InitialNode"/>
+      <__ownedMember xsi:type="wrapper:WrappedSensingAction" __uuid="93b3854d-6501-4245-a989-a8c400c0438f" __poseidonName="SensingAction_1" __poseidonRole="SensingAction"/>
+      <__ownedMember xsi:type="wrapper:WrappedTimingAction" __uuid="3f7d610a-7d33-4512-8840-5dbf30b40147" __poseidonName="TimingAction_1" __poseidonRole="TimingAction"/>
+      <__ownedMember xsi:type="wrapper:WrappedActuatingAction" __uuid="e0759f1b-ba11-47e8-a644-6d1f8df13c49" __poseidonName="ActuatingAction_1" __poseidonRole="ActuatingAction"/>
+      <__ownedMember xsi:type="wrapper:WrappedFinalNode" __uuid="8d61f27a-c429-4bc3-994c-d12a1f0cc97b" __poseidonName="FinalNode_1" __poseidonRole="FinalNode"/>
+      <__ownedMember xsi:type="wrapper:WrappedActivityEdge" source="//@__ownedMember.1/@__ownedMember.1/@initialNode" target="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.0" __uuid="b8ae1e6f-2d24-4a84-8172-9b8eec40d262" __poseidonName="ActivityEdge_1" __poseidonEdge="true" __poseidonRole="ActivityEdge"/>
+      <__ownedMember xsi:type="wrapper:WrappedActivityEdge" source="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.0" target="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.1" __uuid="81db848c-2ce7-404e-83e4-8c5e953b3ca8" __poseidonName="ActivityEdge_2" __poseidonEdge="true" __poseidonRole="ActivityEdge"/>
+      <__ownedMember xsi:type="wrapper:WrappedActivityEdge" source="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.1" target="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.2" __uuid="709263f3-5fcc-4b11-a30c-36eb059f4221" __poseidonName="ActivityEdge_3" __poseidonEdge="true" __poseidonRole="ActivityEdge"/>
+      <__ownedMember xsi:type="wrapper:WrappedActivityEdge" source="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.2" target="//@__ownedMember.1/@__ownedMember.1/@__ownedMember.3" __uuid="bc1a66ad-f8e8-422d-9080-33af217d75e2" __poseidonName="ActivityEdge_4" __poseidonEdge="true" __poseidonRole="ActivityEdge"/>
+    </__ownedMember>
+  </__ownedMember>
+</dsl:PoseidonCoreRootElement>

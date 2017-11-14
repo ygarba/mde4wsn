@@ -1,0 +1,18 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FILE "objectives.xml"»
+<?xml version="1.0" encoding="UTF-8"?>
+<objectives>
+«FOREACH __ownedMember.typeSelect(wsn::Objectives) AS obj-»
+	<power level="«obj.power»"> </power>
+	<memory level="«obj.memory»"> </memory>
+	<pckloss level="«obj.packetloss»"> </pckloss>
+«ENDFOREACH-»
+</objectives>
+«ENDFILE»
+«ENDDEFINE»
+-------------------------------------------------------
+
+

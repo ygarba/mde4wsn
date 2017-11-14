@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="trafo"/>
+	<classpathentry kind="src" path="/graphics"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/repository"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/model_browser"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/J2PrinterWorks.jar"/>
+	<classpathentry kind="lib" path="lib/Printing.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/RichPalette.jar"/>
+	<classpathentry kind="lib" path="lib/Ekit.jar"/>
+	<classpathentry kind="lib" path="lib/Poseidon.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/poseidon_generator"/>
+	<classpathentry kind="lib" path="lib/WMFWriter.jar"/>
+	<classpathentry kind="lib" path="/resources/lib/JTattoo.jar"/>
+	<classpathentry kind="lib" path="lib/License.jar"/>
+	<classpathentry kind="lib" path="lib/axis.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
+	<classpathentry kind="src" path="/metamodel"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

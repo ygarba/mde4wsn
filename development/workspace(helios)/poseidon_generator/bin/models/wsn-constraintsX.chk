@@ -1,0 +1,12 @@
+import dsl;
+import wsn;
+
+//context Task ERROR "WSN DSL: Tasks must have behavior" :
+//	this.behavior != null;
+	
+//context Task ERROR "WSN DSL: Task priority must be greater than 10" :
+//	this.priority > 0;
+	
+//context Cluster ERROR "WSN DSL: cluster must have a head" :
+	//this.eAllContents.select(e|e.metaType == wsn::ClusterHead).size > 0; 
+	

@@ -1,0 +1,44 @@
+<project name = "build project" default = "main">
+
+	<!-- Sets variables which can later be used. -->
+	  	<!-- The value of a property is accessed via ${} -->
+	  	<property name="src.dir" location="src" />
+	  	<property name="lib.dir" location="lib" />
+		<property name="galib.dir" location="gaLib" />
+	  	<property name="build.dir" location="bin" />
+	
+	<path id="build.classpath">
+	    <fileset dir="${lib.dir}">
+	      	<include name="**/*.jar" />
+	    </fileset>
+		<fileset dir="${galib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="main" depends="compile, jar">
+	</target>
+	
+	<target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="${src.dir}" destdir="build/classes" classpathref="build.classpath"/>
+    </target>
+
+    <target name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/Thesis.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="edu.yau.thesis.ThesisMain"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java jar="build/jar/Thesis.jar" fork="true"/>
+    </target>
+
+</project>

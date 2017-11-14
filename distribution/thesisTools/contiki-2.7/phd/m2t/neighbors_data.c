@@ -1,0 +1,364 @@
+
+#include "contiki.h"
+#include "lib/list.h"
+#include "lib/memb.h"
+#include "lib/random.h"
+#include "net/rime.h"
+
+#include <stdio.h>
+#include <string.h>
+#include "wsn.h"
+//#include "runtime.h"	//included by wsn.h already
+
+#define DEBUG 0
+#if DEBUG
+#include <stdio.h>
+#define PRINTF(...) printf(__VA_ARGS__)
+#else
+#define PRINTF(...)
+#endif
+
+enum DataEvents {			//this set of events is same everywhere. Might be moved to wsn.h
+    //OFFSET_EVT = Q_USER_SIG,
+    //OFFSET2_EVT = 150,
+	//RUNTIME_EVENT_TIMER = PROCESS_EVENT_TIMER,
+	RUNTIME_EVENT_UPDATEPOOL = 250,
+	RUNTIME_EVENT_REMOTETRIGGER
+    //RUNTIME_EVENT_NONE				//for automatic transition after entry action completion
+};
+
+struct neighbor {
+  struct neighbor *next;
+  rimeaddr_t addr;
+  struct sharedData shared;
+};
+
+#define MAX_NEIGHBORS 5
+MEMB(neighbors_memb, struct neighbor, MAX_NEIGHBORS);
+
+LIST(neighbors_list);
+
+static struct broadcast_conn broadcast;
+
+/*---------------------------------------------------------------------------*/
+PROCESS(ndata_process, "Neighbors data process");
+/*---------------------------------------------------------------------------*/
+
+static void
+broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
+{
+
+  struct sharedData mm;   //here the mem location is created
+  struct sharedData *m;
+  
+  memcpy(&mm, packetbuf_dataptr(), packetbuf_datalen());
+  m = &mm;  //just grab the pointer here
+  //m = packetbuf_dataptr();  //  -> NEVER DO THIS!!!!
+  
+  //pass on the data for add/modify data pool
+  data_updateDataPool(from, m);
+
+  //dev
+  //printf("Shared data received....Temp = %u\n", n->shared.senseData.temperature);
+}
+
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
+
+/*----------------------------- interfaces -----------------------------------*/
+void data_purge(rimeaddr_t purgedNeighb)
+{
+	static struct neighbor *neighb;
+
+	for(neighb = list_head(neighbors_list);
+	neighb != NULL;
+	neighb = list_item_next(neighb)) {
+		if(rimeaddr_cmp(&neighb->addr, &purgedNeighb)) {	//neighbor facts has already being removed. So remove the data also
+			list_remove(neighbors_list, neighb);	//remove from the list
+			memb_free(&neighbors_memb, neighb);		//free the mem
+			PRINTF("Data for neighbor %u.%u, is purged!!!\n", neighb->addr.u8[0], neighb->addr.u8[1]);
+		}
+	}
+}
+
+/*
+* the data to be shared is broadcasted here to all 1-hop neighbors
+*/
+void data_shareData(struct sharedData* shared) {
+
+	PROCESS_CONTEXT_BEGIN(&ndata_process);
+	packetbuf_copyfrom(shared, sizeof(struct sharedData));
+    broadcast_send(&broadcast);
+	PROCESS_CONTEXT_END(&ndata_process);
+}
+
+void data_updateDataPool(const rimeaddr_t *from, struct sharedData* m) {
+
+	struct neighbor *n;
+
+	/* Check if we already know this neighbor. */
+	for(n = list_head(neighbors_list); n != NULL; n = list_item_next(n)) {
+
+	/* We break out of the loop if the address of the neighbor matches
+	   the address of the neighbor from which we received this
+	   broadcast message. */
+	if(rimeaddr_cmp(&n->addr, from)) {
+	  break;
+	}
+	}
+
+  /* If n is NULL, this neighbor was not found in our list, and we
+	 allocate a new struct neighbor from the neighbors_memb memory
+	 pool. */
+  if(n == NULL) {
+	n = memb_alloc(&neighbors_memb);
+
+	/* If we could not allocate a new neighbor entry, we give up. We
+	   could have reused an old neighbor entry, but we do not do this
+	   for now. */
+	if(n == NULL) {
+		printf("\nFatal! - Cannot allocate memory!\n\n");
+		return;
+	}
+
+	/* Initialize the fields. */
+	rimeaddr_copy(&n->addr, from);
+	n->shared = *((struct sharedData*)m);	//now getting a copy and just a pointer
+
+	/* Place the neighbor on the neighbor list. */
+	list_add(neighbors_list, n);
+  } else {
+	 //ok, we know you, so update what you bring along :)
+	 n->shared = *((struct sharedData*)m);	//now getting a copy and not just a pointer
+  }
+
+  process_post(PROCESS_BROADCAST, RUNTIME_EVENT_UPDATEPOOL, &(n->shared));	//post event for the data pool update
+}
+/*---------------------------------------------------------------------------*/
+PROCESS_THREAD(ndata_process, ev, data)
+{
+  static struct etimer et;
+  
+  //dev
+  static struct neighbor *s;
+  
+  PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
+
+  PROCESS_BEGIN();
+
+  broadcast_open(&broadcast, 130, &broadcast_call);
+
+  PRINTF("neighbors data process started .....\n\r");
+  while(1) {
+
+    etimer_set(&et, CLOCK_SECOND * 10 + random_rand() % (CLOCK_SECOND * 10));
+
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+    //packetbuf_copyfrom(&msg, sizeof(struct broadcast_message));
+    //broadcast_send(&broadcast);
+	
+	//dev
+	PRINTF("-------------------------\n");
+    PRINTF("Neighbor data count = %u \nData pool details:\n", list_length(neighbors_list));
+    for(s = list_head(neighbors_list);
+      s != NULL;
+      s = list_item_next(s)) {
+        PRINTF("Node %u.%u, origin: %u.%u\n", s->addr.u8[0], s->addr.u8[1],
+        	s->shared.addr.u8[0], s->shared.addr.u8[1]);
+ //       PRINTF("Temperature:   %u degrees Celsius  ",
+ //       	(unsigned) (-39.60 + 0.01 * s->shared.senseData.temperature));
+ //       PRINTF("Rel. humidity: %u%%\n",
+ //       	(unsigned) (-4 + 0.0405*(s->shared.senseData.humidity) - 2.8e-6*((s->shared.senseData.humidity)*(s->shared.senseData.humidity))));
+      }
+    PRINTF("-------------------------\n");
+
+    }//while
+
+
+  PROCESS_END();
+}
+/*---------------------------------------------------------------------------*/
+void ndata_start() {
+	process_start(&ndata_process, NULL); 
+}
+
+/*--------------------------  data query engines ----------------------------*/
+
+void data_GetData_Temperature(SearchCriteria_t criterion, int comparator) 
+{
+	if (list_length(neighbors_list) < 1) {
+		return;
+	}
+	
+	int16_t tempVar;
+	struct neighbor *s;
+
+	s = list_head(neighbors_list);
+	tempVar = s->shared.sensorVals.temperature;
+	rimeaddr_copy(&targetAddr, &(s->shared.addr));
+	switch(criterion) {
+		case(EQUAL): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (s->shared.sensorVals.temperature == comparator) {
+							tempVar = s->shared.sensorVals.temperature;
+							//temperature = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("temperature equals %u\n", tempVar);
+			break;
+		}
+		case(MAX): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (s->shared.sensorVals.temperature > tempVar) {
+							tempVar = s->shared.sensorVals.temperature;
+							//temperature = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("Max temperature is %u\n", tempVar);
+			break;
+		}
+		case(MIN): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (s->shared.sensorVals.temperature < tempVar) {
+							tempVar = s->shared.sensorVals.temperature;
+							//temperature = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("Min temperature is %u\n", tempVar);
+			break;
+		}
+		case(MEAN): {
+			uint8_t count;
+			uint16_t total = 0;
+			count = list_length(neighbors_list);
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+				  		total = total + s->shared.sensorVals.temperature;						
+				  }
+				  tempVar = total/count;
+			PRINTF("Mean temperature is %u\n", tempVar);
+			break;
+		}
+		case(SELF): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (rimeaddr_cmp(&(s->shared.addr), &rimeaddr_node_addr)) {
+							tempVar = s->shared.sensorVals.temperature;
+							self_temperature = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("Self temperature is %u\n", tempVar);
+			break;
+		}
+		default: {;}
+	}//switch
+	//temperature = tempVar;
+	sensorVals.temperature = tempVar;
+}
+void data_GetData_Humidity(SearchCriteria_t criterion, int comparator) 
+{
+	if (list_length(neighbors_list) < 1) {
+		return;
+	}
+	
+	int16_t tempVar;
+	struct neighbor *s;
+
+	s = list_head(neighbors_list);
+	tempVar = s->shared.sensorVals.humidity;
+	rimeaddr_copy(&targetAddr, &(s->shared.addr));
+	switch(criterion) {
+		case(EQUAL): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (s->shared.sensorVals.humidity == comparator) {
+							tempVar = s->shared.sensorVals.humidity;
+							//humidity = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("humidity equals %u\n", tempVar);
+			break;
+		}
+		case(MAX): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (s->shared.sensorVals.humidity > tempVar) {
+							tempVar = s->shared.sensorVals.humidity;
+							//humidity = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("Max humidity is %u\n", tempVar);
+			break;
+		}
+		case(MIN): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (s->shared.sensorVals.humidity < tempVar) {
+							tempVar = s->shared.sensorVals.humidity;
+							//humidity = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("Min humidity is %u\n", tempVar);
+			break;
+		}
+		case(MEAN): {
+			uint8_t count;
+			uint16_t total = 0;
+			count = list_length(neighbors_list);
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+				  		total = total + s->shared.sensorVals.humidity;						
+				  }
+				  tempVar = total/count;
+			PRINTF("Mean humidity is %u\n", tempVar);
+			break;
+		}
+		case(SELF): {
+			for(s = list_head(neighbors_list);
+				  s != NULL;
+				  s = list_item_next(s)) {
+						if (rimeaddr_cmp(&(s->shared.addr), &rimeaddr_node_addr)) {
+							tempVar = s->shared.sensorVals.humidity;
+							self_humidity = tempVar;
+							rimeaddr_copy(&targetAddr, &(s->shared.addr));
+						}
+				  }
+			PRINTF("Self humidity is %u\n", tempVar);
+			break;
+		}
+		default: {;}
+	}//switch
+	//humidity = tempVar;
+	sensorVals.humidity = tempVar;
+}
+/*
+void data_SetData_Temperature(int16_t tempVar) {
+	sensorVals.temperature = tempVar;
+	sharedData.sensorVals = sensorVals;
+	runtime_UpdatePool();
+}
+void data_SetData_Humidity(int16_t tempVar) {
+	sensorVals.humidity = tempVar;
+	sharedData.sensorVals = sensorVals;
+	runtime_UpdatePool();
+}
+*/

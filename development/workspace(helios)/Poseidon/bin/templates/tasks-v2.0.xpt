@@ -1,0 +1,252 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FOREACH __ownedMember.typeSelect(wsn::Task).select(e|e.j_deleted != 1) AS e-»
+«FILE "task_" + e.getName() + ".c"»
+/****************************************************
+* Generated code for task -> «e.getName()» 
+*****************************************************/	
+#include "contiki.h"
+#include <stdio.h>
+#include "net/netstack.h"
+#include "net/rime.h"
+
+#include "wsn.h"
+#include "qepn.h"
+#include "runtime.h"
+#include "dev/leds.h"
+//#include "qpn_port.h"
+//#include "bsp.h"
+
+//#include "task_«e.getName()-».h"	//include my header for starting me - ToDo: ??? here or wsn.h
+
+//Remember -> #define PROCESS_NAME(name) extern struct process name
+«FOREACH e.getOutgoingRelationships().typeSelect(Messaging) AS t-»
+//extern struct process «t.msgTarget.getName()-»_process;	//needed to post message to this task
+«ENDFOREACH-»
+
+«FOREACH e.getOutgoingRelationships().typeSelect(Sensing).sensor AS s-»
+//struct «s.id»_data *«s.getName().toUpperCase()-»_Data;	//this is the global defination of data buffer for this sensor
+«ENDFOREACH-»
+
+«FOREACH e.getOutgoingRelationships().typeSelect(Actuating).actuator AS a-»
+//struct «a.id»_data «a.getName().toUpperCase()-»_Data;	//this is the global defination for actuator data
+«ENDFOREACH-»
+
+enum «e.behaviorName-»Events {
+    OFFSET_EVT = Q_USER_SIG,
+    OFFSET2_EVT = 150,
+«FOREACH eAllContents.typeSelect(Messaging) AS evt-»
+	«evt.getName().toUpperCase()-»_EVT, 
+«ENDFOREACH-»
+«FOREACH eAllContents.typeSelect(Timing) AS evt-»
+	«evt.getName().toUpperCase()-»_EVT = PROCESS_EVENT_TIMER, 
+«ENDFOREACH-»
+	RUNTIME_EVENT_UPDATEPOOL,
+	RUNTIME_EVENT_REMOTETRIGGER,
+	«e.getName().toUpperCase()-»_EVENT_MESSAGE = 253;
+    NULL_EVT = 254		//for automatic transition after entry action completion
+};
+
+typedef struct «e.behaviorName.toUpperCase()»Tag {
+    QFsm super;
+    void *data;	//data extracted from event and passed to SM
+} «e.behaviorName»;		//derived from QFsm
+
+«e.behaviorName» «e.behaviorName.toLowerCase()»;		//SM object
+
+/*---------------- Process Declaration -------------------*/
+PROCESS(«e.getName()-»_process, "«e.getName()-»");
+//AUTOSTART_PROCESSES(&«e.getName()-»_process);
+/*--------------------------------------------------------*/
+
+/*------------------- helper functions -------------------*/
+//Timers declare
+«FOREACH e.getOutgoingRelationships().typeSelect(Timing) AS tm-»
+static struct etimer «tm.timer.getName()-»;
+void Start_«e.getName()-»_Timer(uint16_t time)
+{
+   PROCESS_CONTEXT_BEGIN(&«e.getName()-»_process);
+   etimer_set(&«tm.timer.getName()-», CLOCK_SECOND*«tm.timer.time»);
+   PROCESS_CONTEXT_END(&«e.getName()-»_process);
+}
+«ENDFOREACH»
+//Messaging declare
+void «e.getName()-»_SendMessage(struct process * target, void *data)
+{ 
+   	PROCESS_CONTEXT_BEGIN(&«e.getName()-»_process);
+   	process_post(target, «e.getName().toUpperCase()-»_EVENT_MESSAGE, data);
+   	PROCESS_CONTEXT_END(&«e.getName()-»_process);
+}
+
+/*--------------------------------------------------------*/
+
+//SM prototypes
+void «e.behaviorName»_ctor(«e.behaviorName-» *me);
+static QState «e.behaviorName»_initial(«e.behaviorName» *me);
+«REM»«EXPAND _smPrototypes FOR e.behavior-»«ENDREM»
+«EXPAND _smPrototypes(e) FOR eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0)-»
+
+//State Definations
+void «e.behaviorName»_ctor(«e.behaviorName» *me){
+    QFsm_ctor(&me->super, (QStateHandler)&«e.behaviorName»_initial);
+}
+
+QState «e.behaviorName»_initial(«e.behaviorName» *me){ 
+    «FOREACH eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0).eContents.typeSelect(InitialState).getOutgoingRelationships().typeSelect(Transition) AS st-»
+    «REM» ToDo: fix -> return Q_TRAN(&«st.transitionTo.getName()-»); «ENDREM»
+    «ENDFOREACH-»
+    return Q_TRAN(&«e.behaviorName-»_«eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0).eContents.typeSelect(InitialState).get(0).getOutgoingRelationships().typeSelect(Transition).get(0).transitionTo.getName()-»);
+}
+
+«EXPAND _smFunctions(e) FOR eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0)-»
+
+/*------------------ Process Def -------------------------*/
+PROCESS_THREAD(«e.getName()-»_process, ev, data)
+{
+	PROCESS_BEGIN();
+  	«FOREACH e.getOutgoingRelationships().typeSelect(Sensing).sensor AS s-»
+	«s.id»_Configure();	//sensor activated
+	«ENDFOREACH-»
+	«FOREACH e.getOutgoingRelationships().typeSelect(Actuating).actuator AS s-»
+	«s.id»_Configure();	//actuator activated
+	«ENDFOREACH-»
+  	«e.behaviorName-»_ctor(&«e.behaviorName.toLowerCase()-»);
+  	QFsm_init((QFsm *)&«e.behaviorName.toLowerCase()-»); //trigger initial transistion in this object
+  
+  	while(1){
+		PROCESS_WAIT_EVENT();
+		printf("«e.getName()» event dispatched ...\n\r");
+		(&«e.behaviorName.toLowerCase()»)->data = data;	//insert event data pointer in sm object
+		Q_SIG(&«e.behaviorName.toLowerCase()») = ev;
+		QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		
+		/*
+		* The reason for this secondary dispatch is for NULL event.
+		* The number of if's detetmines the length of chain of NULL events possible. Now two!
+		*/
+		if (Q_SIG(&«e.behaviorName.toLowerCase()») == NULL_EVT) { //means completion of entry action automatically triggers transition, i.e. NULL event
+		  QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		}
+		
+		if (Q_SIG(&«e.behaviorName.toLowerCase()») == NULL_EVT) { //means completion of entry action automatically triggers transition, i.e. NULL event
+		  QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		}
+  }
+
+  PROCESS_END();
+}
+/*--------------------------------------------------------*/
+/*-----------------Process Starting Functions-------------*/
+void Start_«e.getName()-»()
+{
+  process_start(&«e.getName()-»_process, NULL);
+}
+/*--------------------------------------------------------*/
+
+«ENDFILE»
+«ENDFOREACH»
+«ENDDEFINE»
+
+-------------------------------------------------------
+
+/***** StateMachine *****/
+«DEFINE _smPrototypes(wsn::Task curTask) FOR wsn::StateMachine-»
+«FOREACH this.eContents.typeSelect(State).reject(e|e.getName().contains("Initial") || e.getName().contains("Final")) AS st-»
+static QState «this.getName()-»_«st.getName()-»(«this.getName()-» *me);
+«ENDFOREACH-»
+«ENDDEFINE»
+
+«DEFINE _smFunctions(wsn::Task curTask) FOR wsn::StateMachine-»
+«FOREACH this.eContents.typeSelect(State).reject(e|e.getName().contains("Initial") || e.getName().contains("Final")) AS st-»
+QState «this.getName()-»_«st.getName()-»(«this.getName()-» *me){
+	switch (Q_SIG(me)) {
+	        case Q_ENTRY_SIG: {
+	        	//entry behavior (an activity) -> «st.entry-»;
+	        	«FOREACH eRootContainer.eAllContents.typeSelect(Activity).select(e|e.getName() == st.entry) AS act-»      			    
+	        	«FOREACH act.eAllContents.typeSelect(Action) AS action-»
+	        	«EXPAND _activityActions(curTask) FOR action-»	       	        	
+	        	«ENDFOREACH-»        	
+	        	«ENDFOREACH-»
+	        	«IF st.getOutgoingRelationships().typeSelect(Transition).exists(e|e.triggerName.toUpperCase() == "NULL")-»
+	        	Q_SIG(&«this.getName().toLowerCase()») = NULL_EVT;
+	        	«ENDIF-»       	 
+	            return Q_HANDLED();
+	        }
+	        case Q_EXIT_SIG: {
+	            //exit behavior (an activity) -> «st.exit-»;
+	        	«FOREACH eRootContainer.eAllContents.typeSelect(Activity).select(e|e.getName() == st.exit) AS act-»     			    
+	        	«FOREACH act.eAllContents.typeSelect(Action) AS action-»
+	        	«EXPAND _activityActions(curTask) FOR action-»	       	        	
+	        	«ENDFOREACH-»        	
+	        	«ENDFOREACH-»
+	            return Q_HANDLED();
+	        }
+	 		«FOREACH st.getOutgoingRelationships().typeSelect(Transition) AS tran-» 
+	        case «tran.triggerName.toUpperCase()-»_EVT: {
+	            return Q_TRAN(&«this.getName()-»_«tran.transitionTo.getName()-»);
+	        }    
+	 		«ENDFOREACH-»
+	    }
+    return Q_IGNORED(); 
+}
+«ENDFOREACH-»
+«ENDDEFINE»
+/***** StateMachine Ends *****/
+
+/***** Entry/Exit Behavior Actions *****/
+«DEFINE _activityActions(wsn::Task curTask) FOR wsn::Action-»	
+		«IF this.metaType == wrapper::WrappedTimingAction-»
+				Start_«curTask.getName()-»_Timer(«this.time-»);
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedUpdatePoolAction-»
+				runtime_UpdatePool(&«this.data-»);
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedSensingAction-»
+				«this.sensorId-»_Get(&«this.data»);	//sensor asked to get new data and place it in buffer
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedActuatingAction-»
+				«this.actuatorId-»_Set(«this.data.toUpperCase()-»_Data);	//actuator asked to update
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedSendMessageAction-»
+				«curTask.getName()-»_SendMessage(&«this.targetTask», &«this.data»);	//send message to another task
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedGetNodeAction-»
+				runtime_GetNodeId("«this.query»");	//get a neighbor node id based on the query and store it in the global var 'remoteNodeId'
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedRemoteTriggerAction-»
+				«IF this.data == null || this.data == ""-»
+				runtime_RemoteTrigger(data);	//sending remote event to -> 'remoteNodeId'. Call GetNodeId (query) prior to this call
+				«ELSE»
+				RemoteTrigger(&«this.data»);		//sending remote event to -> 'remoteNodeId'. Call GetNodeId (query) prior to this call
+				«ENDIF-»
+		«ENDIF-»
+		«IF this.metaType == wrapper::WrappedOpaqueAction-»
+		«LET this.source AS src-»
+			«IF this.language == wsn::Languages::ALF-»
+			«getOpaqueAL(src)»
+			«ENDIF-»
+			«IF this.language == wsn::Languages::C-»
+			«getOpaqueC(src)»
+			«ENDIF-»
+			«IF this.language == wsn::Languages::Java-»
+			«getOpaqueJava(src)»
+			«ENDIF-»
+		«ENDLET-»
+		«ENDIF-»
+«ENDDEFINE»
+/***** Entry/Exit Behavior Actions Ends *****/
+ -------------------------------------------------
+
+«REM»
+«DEFINE _timerDeclare FOR wsn::Timing-»
+ 	static struct etimer «this.timer.getName()»; /* etimer_set(&«this.timer.getName()», CLOCK_SECOND*«this.timer.time.toInteger()»); */
+«ENDDEFINE»
+ 
+
+
+«DEFINE _led FOR wsn::Actuating-»
+		«this.actuator.getName()»_toggle(); //«this.getName()»
+«ENDDEFINE»
+«ENDREM»

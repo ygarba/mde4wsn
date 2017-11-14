@@ -1,0 +1,25 @@
+//Yau, 28th Feb., 2014
+model EdgeRules
+import "PoseidonDiagramModel.dgm";
+
+/*
+rules_for Arc {
+    from Place create Transition
+    from Transition create Place
+}
+*/
+
+/*
+rules_for InteractionMsg {
+    from InitialLifeline create NodeRole
+    from NodeRole create NodeRole 
+    from NodeRole create SensorRole
+    from NodeRole create ActuatorRole
+}
+*/
+
+/*
+rules_for Sensing {
+	from Task create Sensor
+}
+*/

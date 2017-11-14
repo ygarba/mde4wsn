@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="make poseidon distribution" default="poseidon.build.distribution" basedir=".">
+
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant-contrib-1.0b3.jar" />
+
+	<property name="module.base.dir" value=".." />
+
+	<property name="workspace.base.dir" value="${module.base.dir}/../workspace" />
+	<property name="module.output.dir" value="bin" />
+	<property name="ant-extension.jar" value="${module.output.dir}/gentleware.poseidon.ant.jar" />
+	<property name="user.dsl.jar.name" value="user-metamodel.jar"/>
+	<property name="target.dir" location="${basedir}/../target"/>
+	<property name="target.jar.dir" location="${target.dir}/jar"/>
+	<property name="target.compile.dir" location="${target.dir}/compile"/>
+	<property name="output.target.dir" value="${module.base.dir}${file.separator}target" />
+	<property name="dist.dir" location="${output.target.dir}/dist" />
+	<property name="dist.lib.dir" location="${dist.dir}/lib" />
+	<property name="dist.bin.dir" value="${dist.dir}/bin" />
+	
+	<property name="main.class" value="com.gentleware.poseidon.gui.Poseidon"/>
+	<property name="launch.script.windows" value="${dist.bin.dir}/poseidon.bat"/>
+	<property name="launch.script.linux" value="${dist.bin.dir}/poseidon.sh"/>
+	<property name="launch.script.linux.in.root" value="${dist.dir}/poseidon.sh"/>
+	<property name="launch.script.mac" value="${dist.bin.dir}/poseidonMac.sh"/>
+	
+	<property name="repository.dir" value="${output.target.dir}/compile/jars" />	
+	<property name="modules.list" value="
+		  resources,                    
+          repository,
+          graphics,          
+          model_browser,		  
+          Poseidon,
+          generators" />
+	
+	<property name="distribution.modules.list" value="
+          resources,
+		  repository,
+          graphics,          
+          model_browser,
+		  poseidon_generator,
+          Poseidon" />
+	
+	<property name="distributed.modules.jars.list" value="
+		DeltaEngine.jar, DeltaEngine-DSL.jar, DSLRepository.jar,
+		Ekit.jar,
+		graphics.jar,		
+		IDraw.jar,
+		J2PrinterWorks.jar, Jazz-1.3.jar, jgrapht-jdk1.5.jar, jide-oss-2.8.2.jar, jaxrpc.jar,
+		License.jar,
+		model_browser.jar,
+		org.antlr.runtime_3.0.0.v200908120607.jar,
+		org.apache.commons.cli_1.0.0.v20080604-1500.jar,
+		org.eclipse.emf.mwe.core_1.0.0.v201008251122.jar, org.eclipse.emf.mwe.activities_1.0.0.v201008251122.jar, org.eclipse.emf.mwe.ui.simpleEditor_1.0.0.v201008251122.jar, org.eclipse.emf.mwe.ui_1.0.0.v201008251122.jar, org.eclipse.emf.mwe.utils_1.0.0.v201008251122.jar,
+		org.eclipse.emf.mwe2.runtime_1.0.1.v201008251113.jar,
+		org.eclipse.xpand_1.0.1.v201008251147.jar,
+		org.eclipse.xtend.check.ui_1.0.1.v201008251147.jar, org.eclipse.xtend.shared.ui_1.0.1.v201008251147.jar, org.eclipse.xtend.typesystem.emf.ui_1.0.1.v201008251147.jar, org.eclipse.xtend.typesystem.emf_1.0.1.v201008251147.jar, org.eclipse.xtend.typesystem.uml2.ui_1.0.1.v201008251147.jar, org.eclipse.xtend.typesystem.uml2_1.0.1.v201008251147.jar, org.eclipse.xtend.typesystem.xsd.ui_1.0.1.v201008251147.jar, org.eclipse.xtend.typesystem.xsd_1.0.1.v201008251147.jar, org.eclipse.xtend.ui_1.0.1.v201008251147.jar, org.eclipse.xtend.util.stdlib_1.0.1.v201008251147.jar, org.eclipse.xtend_1.0.1.v201008251147.jar,				 
+		poseidon-dsl.jar, Printing.jar, poseidon_generator.jar,
+		RepositoryBrowser.jar, RichPalette.jar, Resources.jar, RepositoryBase.jar, repository.jar,
+		saaj.jar,		
+		WMFWriter.jar
+		" />
+
+
+	<!-- Compiler options -->
+
+	<property name="compiler.debug" value="on" />
+	<property name="compiler.generate.no.warnings" value="off" />
+	<property name="compiler.max.memory" value="256m" />
+	<patternset id="ignored.files">
+		<exclude name="**/CVS/**" />
+		<exclude name="**/SCCS/**" />
+		<exclude name="**/RCS/**" />
+		<exclude name="**/rcs/**" />
+		<exclude name="**/.DS_Store/**" />
+		<exclude name="**/.svn/**" />
+		<exclude name="**/.pyc/**" />
+		<exclude name="**/.pyo/**" />
+		<exclude name="**/*.pyc/**" />
+		<exclude name="**/*.pyo/**" />
+		<exclude name="**/.git/**" />
+	</patternset>
+	<patternset id="library.patterns">
+		<include name="*.zip" />
+		<include name="*.war" />
+		<include name="*.egg" />
+		<include name="*.ear" />
+		<include name="*.swc" />
+		<include name="*.jar" />
+	</patternset>
+	<patternset id="compiler.resources">
+		<include name="**/?*.properties" />
+		<include name="**/?*.xml" />
+		<include name="**/?*.gif" />
+		<include name="**/?*.png" />
+		<include name="**/?*.jpeg" />
+		<include name="**/?*.jpg" />
+		<include name="**/?*.html" />
+		<include name="**/?*.dtd" />
+		<include name="**/?*.tld" />
+		<include name="**/?*.ftl" />
+	</patternset>
+	
+	<path id="dsl.compile.classpath">
+		<fileset dir="${basedir}/../resources/lib">
+			<include name="*.jar"/>
+		</fileset>		
+	</path>
+	
+	<macrodef name="macro.build">
+		<attribute name="module.dir" />
+		<element name="build-post" optional="true" />
+
+		<sequential>
+			<delete dir="${module.base.dir}/@{module.dir}/${module.output.dir}" />
+			<mkdir dir="${module.base.dir}/@{module.dir}/${module.output.dir}" />
+
+			<available file="${module.base.dir}/@{module.dir}/lib" property="module.lib-@{module.dir}" value="true" />
+			<if>
+				<equals arg1="${module.lib-@{module.dir}}" arg2="true" />
+				<then>
+					<echo message="lib found" />
+					<copy todir="${repository.dir}" failonerror="false">
+						<fileset dir="${module.base.dir}/@{module.dir}/lib">
+							<include name="*.jar" />
+						</fileset>
+					</copy>
+				</then>
+			</if>
+			
+			<available file="${module.base.dir}/@{module.dir}/src" property="module.src-@{module.dir}" value="true" />
+			<mkdir dir="${repository.dir}/@{module.dir}" />
+			<if>
+				<equals arg1="${module.src-@{module.dir}}" arg2="true" />
+				<then>
+					<echo message="src found" />
+
+					<path id="compile-path">
+						<fileset dir="${repository.dir}">
+							<include name="*.jar" />
+						</fileset>
+						<fileset dir="${module.base.dir}">
+							<include name="*/lib/*.jar" />
+						</fileset>
+					</path>
+					
+					<copy todir="${module.base.dir}/@{module.dir}/${module.output.dir}">
+					   <fileset dir="${module.base.dir}/@{module.dir}/src">
+					      <include name="**/*.properties"/>
+					   </fileset>
+					</copy>
+
+					<if>
+						<isset property="${compileLog}" />
+						<then>
+							<javac srcdir="${module.base.dir}/@{module.dir}/src" destdir="${module.base.dir}/@{module.dir}/${module.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" target="1.5" defaultexcludes="false">
+								<classpath refid="compile-path" />
+								<patternset refid="ignored.files" />
+								<compilerarg line="-1.5 -log ${output.target.dir}/compile-@{module.dir}.xml" />
+							</javac>
+						</then>
+						<else>
+							<javac srcdir="${module.base.dir}/@{module.dir}/src" destdir="${module.base.dir}/@{module.dir}/${module.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" target="1.5" defaultexcludes="false">
+								<classpath refid="compile-path" />
+								<patternset refid="ignored.files" />
+							</javac>
+						</else>
+					</if>
+
+					<build-post />
+
+					<available file="${module.base.dir}/@{module.dir}/lib/@{module.dir}.jar" property="module.lib-@{module.dir}-exists" value="true" />					
+					<if>
+						<equals arg1="${module.lib-@{module.dir}-exists}" arg2="true" />
+						<then>
+							<unzip src="${module.base.dir}/@{module.dir}/lib/@{module.dir}.jar" dest="${repository.dir}/@{module.dir}">
+					    		<patternset>					        
+					        	<exclude name="**/*.java"/>
+					    		</patternset>
+							</unzip>
+						</then>					
+					</if>
+					
+					<jar jarfile="${module.base.dir}/@{module.dir}.jar">
+						<fileset dir="${module.base.dir}/@{module.dir}/${module.output.dir}">
+							<include name="**/**" />
+						</fileset>
+						<fileset dir="${repository.dir}/@{module.dir}">
+							<include name="**/**" />
+						</fileset>						
+					</jar>
+
+					<move file="${module.base.dir}/@{module.dir}.jar" todir="${repository.dir}" />
+				</then>
+			</if>
+
+		</sequential>
+	</macrodef>
+	
+	<property name="init.dir.name" value="" />
+	<target name="-init.dir">
+		<delete dir="${init.dir.name}" includeemptydirs="true" failonerror="false" />
+		<mkdir dir="${init.dir.name}" />
+	</target>
+
+	<target name="init.and.clean" description="Build initialization">
+		<foreach list="${output.target.dir}, ${repository.dir}" target="-init.dir" param="init.dir.name" trim="true" />
+	</target>
+
+	<property name="module.name" value="" />
+
+	<target name="-module.compile">
+		<macro.build module.dir="${module.name}" />
+	</target>
+
+	<macrodef name="macro.compile.modules">
+		<attribute name="compile-target" default="-module.compile" />
+		<sequential>
+			<foreach list="${modules.list}" target="@{compile-target}" param="module.name" trim="true" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="macro.compile.distribution.modules">
+		<attribute name="compile-target" default="-module.compile" />
+		<sequential>
+			<foreach list="${distribution.modules.list}" target="@{compile-target}" param="module.name" trim="true" />
+		</sequential>
+	</macrodef>
+	
+	<target name="compile">
+		<macro.compile.modules />
+	</target>
+	
+	<target name="compile.distribution">
+		<antcall target="build-all-for-user-metamodel"/>
+		<macro.compile.distribution.modules/>		
+	</target>
+	
+	<target name="build-all-for-user-metamodel">
+		<antcall target="build-all-for-user-model">
+			<param name="param.user.dsl.plugin.name" value="metamodel"/>			
+		</antcall>
+    </target>
+	
+	<target name="build-all-for-user-model">		
+		<!--antcall target="create-target-dir"></antcall-->		
+		<antcall target="create-user-dsl-metamodel"></antcall>
+    </target>
+	
+	<target name="create-user-dsl-metamodel">
+		<antcall target="compile-user-dsl"></antcall>
+		<antcall target="create-metamodel-user-dsl-jar"></antcall>		
+	</target>
+	
+	<target name="compile-user-dsl">
+		<mkdir dir="${target.compile.dir}/${param.user.dsl.plugin.name}"/>		
+		<javac srcdir="${basedir}/../${param.user.dsl.plugin.name}/src" destdir="${target.compile.dir}/${param.user.dsl.plugin.name}" fork="true" target="1.5" defaultexcludes="false" debug="true">
+			<classpath refid="dsl.compile.classpath"/>
+		</javac>
+	</target>
+	
+	<target name="create-metamodel-user-dsl-jar">
+		<mkdir dir="${target.jar.dir}"/>		
+		<!--copy file="${basedir}/../resources/lib/${user.dsl.jar.name}" tofile="${basedir}/../resources/lib/${user.dsl.jar.name}.bak" failonerror="false"/-->
+		<jar jarfile="${repository.dir}/${user.dsl.jar.name}" defaultexcludes="yes" followsymlinks="false">
+			<fileset dir="${target.compile.dir}/${param.user.dsl.plugin.name}" defaultexcludes="yes">							
+				<include name="**/**" />
+				<exclude name="**/dsl/impl/**" />
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${basedir}/../${param.user.dsl.plugin.name}/src">
+				<include name="**/**" />
+				<exclude name="**/package.jdo" />
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${basedir}/models">
+				<include name="${user-template.dsl.model.name}"/>
+				<include name="${core.dsl.model.name}"/>
+			</fileset>
+		</jar>
+	</target>
+
+
+	<target name="prepare.execution">
+		<property name="resources.jar.file" value="Resources.jar" />
+
+		<unzip src="${module.base.dir}/resources/lib/${resources.jar.file}" dest="${repository.dir}/resources">
+			<patternset>					        
+				<exclude name="**/*.java"/>
+			</patternset>
+		</unzip>
+		<jar jarfile="${module.base.dir}/${resources.jar.file}" filesonly="true" duplicate="preserve">
+			<fileset dir="${repository.dir}/resources">
+				<include name="**/**" />
+			</fileset>			
+			<fileset dir="${module.base.dir}/resources/icons" includes="**" />
+			<fileset dir="${module.base.dir}/resources/splash" includes="**" />
+		</jar>
+
+		<move file="${module.base.dir}/${resources.jar.file}" todir="${repository.dir}" />
+
+		<unzip dest="${repository.dir}/emf-metamodel">
+		    <fileset dir="${repository.dir}">
+		        <include name="poseidon-core-metamodel.jar"/>
+		    	<include name="user-metamodel.jar"/>
+		    </fileset>
+		</unzip>
+		<jar jarfile="${repository.dir}/emf-metamodel.jar">
+			<fileset dir="${repository.dir}/emf-metamodel">
+				<include name="**/**" />
+			</fileset>
+		</jar>
+		
+		<zip destfile="${repository.dir}/poseidon_generator.jar" update="true"
+		       basedir="${module.base.dir}/poseidon_generator/src"
+		       includes="**/**"
+		       excludes="com/**"/>
+	</target>
+	
+	<path id="target-classpath-path">
+		<fileset dir="${repository.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="${workspace.base.dir}/icons"/>
+	</path>
+
+	<target name="init.ant.extension">
+		<delete file="${ant-extension.jar}" />
+		<mkdir dir="bin" />
+		<javac srcdir="src" destdir="bin">
+			<classpath refid="target-classpath-path" />
+		</javac>
+		<jar basedir="bin" jarfile="${ant-extension.jar}" />
+	</target>
+	
+	<!-- Preparation stuff -->
+	
+	<path id="dist.classpath">
+		<fileset dir="${libs.for.classpath.dir}" id="libs.for.dist.fileset">			
+			<include name="*.jar"/>
+		</fileset>
+	</path>	
+
+	<property name="prepare_dist.dir" value="${output.target.dir}/prepare_dist/dist_bin" />
+	<property name="emf.dir" value="${output.target.dir}/prepare_dist/emf_bin" />
+	<property name="emf.jar.dir" value="${output.target.dir}/prepare_dist/emf_jar" />
+	<property name="jar.for.emf" value="emf.jar" />
+	<property name="prepare_dist.lib.dir" value="${output.target.dir}/prepare_dist/dist_lib" />
+	<property name="prepare_dist.jar.dir" value="${output.target.dir}/prepare_dist/dist_jar" />
+	<property name="libs.for.classpath.dir" location="${prepare_dist.lib.dir}" />	
+	<property name="poseidon.jar" value="poseidon.jar" />
+	<property name="prepare_dist.modules.list" value="
+			graphics,			
+			Poseidon"
+	/>
+	
+	<target name="prepare-dist">
+		<!-- Copy binfiles of modules -->
+		<delete dir="${emf.dir}" />		
+		<mkdir dir="${emf.dir}" />
+		<delete dir="${emf.jar.dir}" />		
+		<mkdir dir="${emf.jar.dir}" />
+		<!--copy-emf-binfiles/-->
+		<!-- Unzip content of different emf plugins into one folder-->
+		<unzip dest="${emf.dir}">
+		    <patternset>
+		        <include name="**/*.class"/>		        
+		    </patternset>
+		    <fileset dir="${repository.dir}">
+		        <include name="org.eclipse.emf.common_*.jar"/>
+		    	<include name="org.eclipse.emf.ecore.xmi_*.jar"/>
+		    	<include name="org.eclipse.emf.ecore_*.jar"/>
+		    	<include name="org.eclipse.emf.edit_*.jar"/>		        
+		    </fileset>
+		</unzip>
+		<!-- Add all emf classes to one jar-file -->
+		<jar jarfile="${emf.jar.dir}/${jar.for.emf}">
+			<fileset dir="${emf.dir}">
+				<include name="**/**" />
+			</fileset>
+		</jar>
+		<delete dir="${prepare_dist.dir}" />
+		<mkdir dir="${prepare_dist.dir}" />
+		<foreach list="${prepare_dist.modules.list}" target="copy-module-binfiles" param="module.name" trim="true" />
+		<!-- Copy project libraries and jar of modules -->
+		<delete dir="${prepare_dist.lib.dir}" />
+		<mkdir dir="${prepare_dist.lib.dir}" />
+		
+		<copy todir="${prepare_dist.lib.dir}">
+			<fileset dir="${basedir}/../resources/lib">
+				<include name="*.jar"/>				
+			</fileset>
+		</copy>
+		
+		<copy todir="${prepare_dist.lib.dir}">
+			<fileset dir="${basedir}/../Poseidon/lib">
+				<exclude name="Poseidon.jar"/>
+			</fileset>
+		</copy>
+		
+		<copy todir="${prepare_dist.lib.dir}">
+			<fileset dir="${basedir}/../repository/lib">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
+
+		<foreach list="${distributed.modules.jars.list}" target="copy-distribution-jars-to-prepare-dir" param="jar.name" trim="true" />
+
+		<copy todir="${prepare_dist.lib.dir}">
+    		<fileset dir="${basedir}/../resources/lib">
+    			<include name="*.jar"/>
+    		</fileset>
+		</copy>
+		<copy todir="${prepare_dist.lib.dir}">
+    		<fileset dir="${repository.dir}">
+    			<include name="emf-metamodel.jar"/>
+    		</fileset>
+		</copy>		
+		<copy todir="${prepare_dist.lib.dir}">
+			<fileset dir="${emf.jar.dir}">
+		    	<include name="emf.jar"/>
+		    </fileset>
+		</copy>
+		
+		<!-- Make one common jar -->
+		<delete dir="${prepare_dist.jar.dir}" />
+		<mkdir dir="${prepare_dist.jar.dir}" />
+		<echo message="${libs.for.classpath.dir}"></echo>
+		<pathconvert pathsep=" " property="dist.classpath.string" refid="libs.for.dist.fileset">
+			<map from="${libs.for.classpath.dir}${file.separator}" to="" />
+		</pathconvert>
+		<pathconvert pathsep=" " property="dist.classpath.for.exe.string" refid="libs.for.dist.fileset">
+			<map from="${libs.for.classpath.dir}${file.separator}" to="./lib/" />
+		</pathconvert>	
+		<jar jarfile="${prepare_dist.jar.dir}/${poseidon.jar}">
+			<fileset dir="${prepare_dist.dir}">
+				<include name="**/**" />
+			</fileset>
+			<manifest>				
+				<attribute name="Main-Class" value="com.gentleware.poseidon.gui.Poseidon" />
+				<attribute name="Class-Path" value=". ${dist.classpath.string} ${dist.classpath.for.exe.string}" />
+			</manifest>
+		</jar>
+			
+		<!-- Remove jars of modules -->
+		<foreach list="${prepare_dist.modules.list}" target="remove-module-jar" param="module.name" trim="true" />
+	</target>
+			
+	<target name="copy-module-binfiles">
+		<echo message="module ${module.name}"/>		
+		
+		<unzip src="${repository.dir}/${module.name}.jar" dest="${prepare_dist.dir}">
+    		<patternset>
+        		<exclude name="**/*.java"/>
+    		</patternset>
+		</unzip>
+		
+		<copy todir="${prepare_dist.dir}">
+	    	<fileset dir="${repository.dir}/${module.name}">
+	        	<include name="**/*"/>
+	    	</fileset>
+		</copy>
+	</target>
+	
+	<target name="copy-emf-binfiles">
+		<unzip dest="${emf.dir}">
+		    <patternset>
+		        <include name="**/*.class"/>		        
+		    </patternset>
+		    <fileset dir="${repository.dir}">
+		        <include name="org.eclipse.emf.common_*.jar"/>
+		    	<include name="org.eclipse.emf.ecore.xmi_*.jar"/>
+		    	<include name="org.eclipse.emf.ecore_*.jar"/>
+		    	<include name="org.eclipse.emf.edit_*.jar"/>		        
+		    </fileset>
+		</unzip>
+	</target>
+	
+	<target name="remove-module-jar">
+		<delete file="${prepare_dist.lib.dir}/${module.name}.jar"/>
+	</target>
+	
+	<property name="ant.lib.dir" value="./lib"/>
+
+	<target name="make-preparation-for-dist">
+		<antcall target="prepare-dist"/>		
+	</target>
+	
+	<!-- End of preparation stuff -->
+	
+	<target name="collect-distribution-files">
+		<delete dir="${dist.lib.dir}"/>
+		<delete dir="${dist.bin.dir}"/>
+		<delete dir="${dist.dir}"/>		
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.lib.dir}"/>
+		<mkdir dir="${dist.bin.dir}"/>		
+
+		<copy todir="${dist.lib.dir}">
+			<fileset dir="${prepare_dist.lib.dir}">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist.lib.dir}">
+			<fileset dir="${prepare_dist.jar.dir}">
+				<include name="${poseidon.jar}"/>				
+			</fileset>
+		</copy>
+		<copy todir="${dist.bin.dir}">
+			<fileset dir="${repository.dir}/resources">
+				<include name="PoseidonMacIcon.icns"/>				
+			</fileset>
+		</copy>		
+	</target>
+	
+
+	<target name="make-launch-scripts">
+		<antcall target="make-launch-script-windows"/>
+		<!-- Generate unix launch script to bin folder-->
+		<antcall target="make-launch-script-bash">
+			<param name="launch.script.bash" value="${launch.script.linux}"/>
+			<param name="executable.jar.relative.path" value="../lib/poseidon.jar"/>
+		</antcall>
+		<!-- Generate unix launch script to root folder-->
+		<antcall target="make-launch-script-bash">
+			<param name="launch.script.bash" value="${launch.script.linux.in.root}"/>
+			<param name="executable.jar.relative.path" value="lib/poseidon.jar"/>
+		</antcall>
+		<antcall target="make-launch-script-bash">
+			<param name="launch.script.bash" value="${launch.script.mac}"/>
+			<param name="executable.jar.relative.path" value="../lib/poseidon.jar"/>
+		</antcall>
+	</target>
+	
+	<target name="make-launch-script-windows">
+		<delete file="${launch.script.windows}" />		
+		<echo file="${launch.script.windows}" append="true">
+@echo off
+
+set OLD_DIR=%cd%
+chdir /D %~f0\..\..
+
+set POSEIDON_HOME=%cd%
+
+if defined JAVA_HOME (
+	goto :START_POSEIDON
+)
+
+if exist "%POSEIDON_HOME%\jre" (
+  set JAVA_HOME=%POSEIDON_HOME%\jre
+  goto :START_POSEIDON
+)
+
+rem ***if no JAVA_HOME could be set***
+title JAVA_HOME is not set
+echo.
+echo Could not find a JDK.
+echo Either you have to install JDK 1.5,
+echo or you have to set JAVA_HOME to your JDK installation directory.
+echo.
+pause
+goto :END
+
+
+:START_POSEIDON
+
+set JAVACMD=java
+set OLD_PATH=%PATH%
+set PATH=%JAVA_HOME%\bin;%PATH%
+
+%JAVACMD% -Xms256m -Xmx1024m -jar lib/${poseidon.jar} %*
+
+:End
+set PATH=%OLD_PATH%
+chdir %OLD_DIR%
+title %cd%			
+</echo>
+<echo message="Created script ${launch.script.windows}"/>		
+	</target>
+		
+
+	
+	<target name="make-launch-script-bash">
+		<delete file="${launch.script.bash}" />
+<echo file="${launch.script.bash}" append="true">#!/bin/bash
+#
+#
+# Script requires bash v2.0 and above (for one-dimensional arrays)
+#
+# Script automatically generated by Ant. Don't modify directly.
+# For debugging purpose activate the following:
+# set -vx
+ulimit -s 2048
+declare -a JAVA_ARGS
+declare -a JAVA_TRAILING_ARGS
+
+# the next line is for the installer:
+# it replaces this comment with a command to set POSEIDON_HOME to the install folder
+#SET_POSEIDON_HOME_COMMAND
+
+exists() {
+        if [ -z `type -t "$1"` ] ; then
+                echo ""
+        else
+                echo "ok"
+        fi
+}
+
+pushTrailingArg() {
+    if [[ ! (-z "${1}")]] ; then
+        JAVA_TRAILING_ARGS_SIZE=${#JAVA_TRAILING_ARGS[*]}
+        JAVA_TRAILING_ARGS[$JAVA_TRAILING_ARGS_SIZE]="${1}"
+    fi
+}
+
+pushArg() {
+    if [[ ! (-z "${1}")]] ; then
+        JAVA_ARGS_SIZE=${#JAVA_ARGS[*]}
+        JAVA_ARGS[$JAVA_ARGS_SIZE]="${1}"
+    fi
+}
+
+resolvePath() {
+    cmd="`basename "${1}"`"
+    dir="`dirname "${1}"`"
+	    cd "$dir"
+
+	    while [ -h "$cmd" ]; do
+	        link="`ls -l "$cmd" | cut -d\> -f2 | cut -c2-`"
+	        cmd="`basename "$link"`"
+	        dir="`dirname "$link"`"
+	        cd "$dir"
+	    done
+
+	    echo `pwd -P`/$cmd
+}
+
+checkJavaHome() {
+	     if [ -z "${JAVA_HOME}" ] ; then
+	         if [ -d "${POSEIDON_HOME}/jre" ] ; then
+	             echo "No JAVA_HOME set, using the installed JRE."
+	             JAVA_HOME="${POSEIDON_HOME}/jre"
+	         else
+	 	       JAVA_EXECUTABLE=`which java`
+	 	       if [ -x $JAVA_EXECUTABLE ] ; then
+	 	           JAVA_HOME=${JAVA_EXECUTABLE/\/bin\/java/}
+	 	       else
+	                 echo "Could not find a JDK."
+	                 echo "Either you have to install JDK 1.5 (or up),"
+	                 echo "or you have to set JAVA_HOME to your JDK installation directory."
+	                 exit
+	             fi
+	         fi
+	     fi
+	     echo "Found JAVA_HOME to be \"${JAVA_HOME}\"."
+}
+
+# You must not change to the script-directory before parsing the arguments
+chdirToScriptDir() {
+	    MY_COMMAND="`resolvePath "${0}"`"
+	    echo "Absolute path: ${MY_COMMAND}"
+	    INSTALLATION_DIRECTORY="`dirname "${MY_COMMAND}"`"
+	    if [ -z "${POSEIDON_HOME}" ] ; then
+	        cd "${INSTALLATION_DIRECTORY}"
+	        cd ..
+	        export POSEIDON_HOME="`pwd -P`"
+	    fi
+	    cd "${INSTALLATION_DIRECTORY}"
+}
+
+setJavaCommand() {
+	    JAVA_COMMAND="$JAVA_HOME/bin/java"
+	    export JAVA_COMMAND
+}
+addJavaArgs() {
+	    # increase memory here, if required (e. g. -Xmx512m)
+	    pushArg -Xms256m
+	    pushArg -Xmx1024m
+	    # pushArg -Dorg.xml.sax.driver=org.apache.xerces.parsers.SAXParser
+</echo>
+		<if>
+			<equals arg1="${launch.script.bash}" arg2="${launch.script.linux}" />
+			<then>
+<echo file="${launch.script.bash}" append="true">		
+	    PLATFORM_JAVA_ARGS=
+	    if [[ ! (-z "${PLATFORM_JAVA_ARGS}")]] ; then
+	        pushArg "${PLATFORM_JAVA_ARGS}"
+	    fi
+</echo>				
+			</then>
+		</if>
+		
+		<if>
+			<equals arg1="${launch.script.bash}" arg2="${launch.script.mac}" />
+			<then>
+<echo file="${launch.script.bash}" append="true">		
+    	pushArg "-Xdock:name=Poseidon for DSL"
+		pushArg "-Xdock:icon=PoseidonMacIcon.icns"
+</echo>
+			</then>
+		</if>		
+
+<echo file="${launch.script.bash}" append="true">		
+}
+addJavaMain() {		 
+		pushArg -jar	    
+		pushArg "${executable.jar.relative.path}"
+}
+addJavaMainArgs() {
+	    pushArg "${POSEIDON_PROJECT_TO_LOAD}"
+}
+addJavaProperties() {
+	    pushArg "-Dposeidon.user.dir.SE=${POSEIDONSE_HOME}"
+	    pushArg "-Dposeidon.java.home=${JAVA_HOME}"
+	    pushArg "-Djava.net.preferIPv4Stack=true"
+}
+# Best: Parse arguments before everything else is done, because it relies on the current working directory to
+# resolve paths
+parseArguments() {
+	    POSEIDON_PROJECT_TO_LOAD=
+	    export POSEIDON_PROJECT_TO_LOAD
+
+	    # Copy all other args
+	    for arg in "$@"
+	    do
+	        pushTrailingArg "$arg"
+	    done
+}
+setJavaClasspath() {
+	    CLASSPATH="../lib/poseidon2.jar:../lib/uml14.jar:../lib/printing.jar:../lib/wmf_export.jar:../lib/concurrent_license_server.jar"
+	    CLASSPATH="${CLASSPATH}:${JAVA_HOME}/jre/lib/rt.jar" # for compilation
+
+	    export CLASSPATH
+}
+main() {
+	    # Take care when changing the order of the following calls, as they might depend on each other. Parsing arguments
+	    # is the first thing which needs to be done.
+	    if [ `exists parseArguments` ] ; then
+	        parseArguments "${@}"
+	    fi
+
+	    chdirToScriptDir
+
+	    if [ `exists hookAfterChdirToScriptDir` ] ; then
+	        hookAfterChdirToScriptDir
+	    fi
+	    if [ `exists addJavaArgs` ] ; then
+	        addJavaArgs
+	    fi
+	    if [ `exists addJavaProperties` ] ; then
+	        addJavaProperties
+	    fi
+	    if [ `exists addJavaMain` ] ; then
+	        addJavaMain
+	    fi
+	    if [ `exists addJavaMainArgs` ] ; then
+	        addJavaMainArgs
+	    fi
+
+	    checkJavaHome
+	    setJavaCommand
+
+	    #if [ `exists setJavaClasspath` ] ; then
+	        # setJavaClasspath
+	    #fi
+
+	    if [ `exists initBeforeCommand` ] ; then
+	        initBeforeCommand
+	    fi
+
+
+	    if [ `exists doAfterCommand` ] ; then
+	        "${JAVA_COMMAND}" "${JAVA_ARGS[@]}" "${JAVA_TRAILING_ARGS[@]}" &amp;
+	        doAfterCommand
+	    else
+	        echo "${JAVA_COMMAND}" "${JAVA_ARGS[@]}" "${JAVA_TRAILING_ARGS[@]}"
+	        "${JAVA_COMMAND}" "${JAVA_ARGS[@]}" "${JAVA_TRAILING_ARGS[@]}"
+	    fi
+}
+
+main "${@}"
+
+</echo>
+<echo message="Created script ${launch.script.bash}"/>
+	</target>
+	
+	<target name="copy-distribution-jars-to-prepare-dir">
+		<copy todir="${prepare_dist.lib.dir}" verbose="true">
+			<fileset dir="${repository.dir}">
+				<include name="${jar.name}"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="add-jar-to-classpath">
+		<echo file="${launch.script.windows}" append="true" message="lib/${jar.name};" />		
+		<echo message="lib/${jar.name};" />
+	</target>
+		
+	<target name="poseidon.build" depends="init.and.clean, compile.distribution, prepare.execution" description="compile and build poseidon" />
+	
+	<target name="poseidon.build.distribution" depends="poseidon.build, make-preparation-for-dist, collect-distribution-files, make-launch-scripts" description="builds poseidon distribution" />
+</project>

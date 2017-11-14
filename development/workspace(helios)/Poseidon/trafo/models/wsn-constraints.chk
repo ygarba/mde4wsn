@@ -1,0 +1,15 @@
+import dsl;
+import wsn;
+
+context Task ERROR "WSN DSL: Tasks must have behavior" :
+	this.behaviorName.length > 0 ;
+	
+context Sensor ERROR "WSN DSL: Sensor must have an ID" :
+	this.id.length > 0 ;
+	
+//context Task ERROR "WSN DSL: Task priority must be greater than 10" :
+//	this.priority > 0;
+	
+//context Cluster ERROR "WSN DSL: cluster must have a head" :
+	//this.eAllContents.select(e|e.metaType == wsn::ClusterHead).size > 0; 
+	

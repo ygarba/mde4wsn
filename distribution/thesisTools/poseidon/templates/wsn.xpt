@@ -1,0 +1,130 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FILE "wsn.h"»
+#ifndef __WSN_H__
+#define __WSN_H__
+
+//Sensor and Actuator headers
+«FOREACH __ownedMember.typeSelect(wsn::Sensor) AS s-»
+#include "«s.id.toLowerCase()».h"
+«ENDFOREACH-»
+«FOREACH __ownedMember.typeSelect(wsn::Actuator) AS a-»
+#include "«a.id.toLowerCase()».h"
+«ENDFOREACH-»
+
+#ifndef WSNSIM
+#define WSNSIM 0
+#endif
+
+#ifndef WSNOPT
+#define WSNOPT 0
+#endif
+
+«FOREACH __ownedMember.typeSelect(wsn::Cluster) AS c-»
+//cluster prototype
+void cluster_start(void);
+«ENDFOREACH-»
+
+typedef uint8_t bool;
+#define false 0;
+#define true 1;
+
+//for searching facts and data list
+typedef enum {
+	EQUAL,
+	MAX,
+	MIN,
+	MEAN,
+	SELF
+}SearchCriteria_t;
+
+//data search prototypes
+«FOREACH __ownedMember.typeSelect(wsn::Data).select(e|e.shared == true) AS d-»
+«FOREACH d.variable AS v-»
+void data_GetData_«v.getName().toFirstUpper()»(SearchCriteria_t, int);
+«ENDFOREACH-»
+«ENDFOREACH-»
+
+//Data
+«FOREACH __ownedMember.typeSelect(wsn::Data) AS d-»
+struct «d.getName()» {
+«FOREACH d.variable AS v-»
+	«getVariableType(v.type, v.signed)» «v.getName()»;
+«ENDFOREACH-»
+};
+struct «d.getName()» «d.getName()»;	//declare 
+«ENDFOREACH-»
+
+struct sharedData {
+	rimeaddr_t addr;
+	«FOREACH __ownedMember.typeSelect(wsn::Data).select(e|e.shared == true) AS d-»
+	struct «d.getName()» «d.getName()»; 
+	«ENDFOREACH-»
+}; 
+struct sharedData sharedData;
+
+struct remoteTrig {	//remote trigger message carries the exec code and the shared data
+	uint8_t code;
+	struct sharedData sharedData;
+};
+struct remoteTrig remoteTrig;
+
+/* Globals variables. Available to developer */
+rimeaddr_t targetAddr;
+//Self Data
+uint8_t runtime_activating_specific;	//to be deprecated
+uint16_t self_battery;
+uint8_t self_hop;
+bool self_ch;
+rimeaddr_t my_ch_addr;
+uint8_t self_cm;
+uint8_t self_neighbors;
+«FOREACH __ownedMember.typeSelect(wsn::Data).select(e|e.shared == true) AS d-»
+«FOREACH d.variable AS v-»
+«getVariableType(v.type, v.signed)» self_«v.getName()»;
+«ENDFOREACH-»
+«ENDFOREACH-»
+«FOREACH __ownedMember.typeSelect(wsn::Data) AS d-»
+«FOREACH d.variable AS v-»
+«getVariableType(v.type, v.signed)» «v.getName()»;
+«ENDFOREACH-»
+«ENDFOREACH-»
+uint16_t battery;
+uint16_t link;
+uint8_t hop;
+uint8_t neighbors;
+bool ch;
+
+/******** non gen *************/
+void runtime_GetNodeId(void *data);
+void runtime_UpdatePool();
+void runtime_RemoteTrigger(uint8_t, void*);
+
+void facts_GetNode_Battery(SearchCriteria_t, int);
+void facts_GetNode_Link(SearchCriteria_t, int);
+void facts_GetNode_Hop(SearchCriteria_t, int);
+void facts_GetNode_Ch(SearchCriteria_t, int);
+uint8_t facts_GetNeighbors(void);
+uint16_t facts_GetBattery(void);
+bool facts_AnyCH(void);
+
+void data_shareData(struct sharedData* shared);
+void data_updateDataPool(const rimeaddr_t *from, struct sharedData* m);
+
+//process start
+void runtime_init(void);
+void nfacts_start(void);
+void ndata_start(void);
+
+//housekeeping
+rimeaddr_t facts_purge(void);
+void data_purge(rimeaddr_t);
+
+#endif /* ifndef __WSN_H__ */
+«ENDFILE»
+«ENDDEFINE»
+-------------------------------------------------------
+
+

@@ -1,0 +1,57 @@
+import dsl;
+import wsn;
+
+String getName(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getName(java.lang.Object);
+	
+List getOutgoingRelationships(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getOutgoings(java.lang.Object);	
+	
+List getIncomingRelationships(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getIncomings(java.lang.Object);	
+	
+String getOpaqueAL(String src):
+	JAVA com.yau.phd.OpaqueActions.getOpaqueAL(java.lang.String);
+
+String getOpaqueC(String src):
+	JAVA com.yau.phd.OpaqueActions.getOpaqueC(java.lang.String);
+	
+String getOpaqueJava(String src):
+	JAVA com.yau.phd.OpaqueActions.getOpaqueJava(java.lang.String);
+	
+String getVariableType(wsn::VariableType type, Boolean sign):
+	switch(type){
+		case wsn::VariableType::bool : "bool" 
+		case wsn::VariableType::int8 :  (sign == true ? "int8_t" : "uint8_t" )
+		case wsn::VariableType::int16 : (sign == true ? "int16_t" : "uint16_t")
+		case wsn::VariableType::int32 : (sign == true ? "int32_t" : "uint32_t")
+		case wsn::VariableType::int64 : (sign == true ? "int64_t" : "uint64_t")
+		case wsn::VariableType::float : "float" 
+		case wsn::VariableType::double : "double" 
+		default : ""
+	};
+	
+String getEventName(wsn::EventType event):
+	switch(event){
+		case wsn::EventType::none : "RUNTIME_EVENT_NONE"
+		case wsn::EventType::timer : "RUNTIME_EVENT_TIMER" 
+		case wsn::EventType::data : "RUNTIME_EVENT_UPDATEPOOL" 
+		case wsn::EventType::remote : "RUNTIME_EVENT_REMOTETRIGGER" 
+		default : "RUNTIME_EVENT_NULL"
+	};
+	
+String getNodeParameters(String query):
+	JAVA com.yau.phd.NodeActions.getNodeParameters(java.lang.String);
+	
+String getDataParameters(String query):
+	JAVA com.yau.phd.DataActions.getDataParameters(java.lang.String);
+	
+String getVarName(String query):
+	JAVA com.yau.phd.DataActions.getVarName(java.lang.String);
+	
+String enableToDigit(wsn::ActivationType val):
+	JAVA com.yau.phd.Utils.enableToDigit(com.gentleware.poseidon.dsl.wsn.ActivationType);
+	
+String disableToDigit(wsn::ActivationType val):
+	JAVA com.yau.phd.Utils.disableToDigit(com.gentleware.poseidon.dsl.wsn.ActivationType);
+	

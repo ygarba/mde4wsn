@@ -1,0 +1,31 @@
+//Yau, 28th Feb., 2014
+model RapidButtons 
+import "PoseidonDiagramModel.dgm";
+
+/*
+button Arc {
+    anchors: Place Transition
+    edge: Arc
+    position: RIGHT_TOP LEFT_BOTTOM
+    icon: "arrow-right-solid" 
+}
+*/
+
+/*
+button Sensing {
+    anchors: Task Sensor
+    edge: Sensing
+    position: RIGHT_TOP LEFT_BOTTOM
+    icon: "arrow-right-solid" 
+    //direction: OUTGOING
+}
+*/
+/*
+button Actuating {
+    anchors: Task Actuator
+    edge: Actuating
+    position: RIGHT_TOP LEFT_BOTTOM
+    icon: "arrow-right-solid" 
+    //direction: OUTGOING
+}
+*/

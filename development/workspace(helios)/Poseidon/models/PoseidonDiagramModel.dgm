@@ -1,0 +1,583 @@
+//Yau, 28th Feb., 2014
+import "EcoreMetamodelMapping.map"; 
+
+file_extension: "wsn_xmi"
+//diagram_types: "Network" "Node" "StateMachine" "Activity" "Platform"
+diagram_types: "Node" "StateMachine" "Activity" "Platform"
+
+// diagram elements
+
+/********************Nodes**********************/
+node Cluster {
+    default_name: "cluster"
+    metamodel_element: Cluster
+    icon: "diagram-modified"
+    default_size: 5 * 4
+    minimum_size: 5 * 4
+    shape: RECTANGLE
+    name_position: UNDER 
+    allowed_diagram_types: Node
+    
+    /*
+    container_options {
+        can_contain Node
+        can_contain ClusterHead
+        //can_contain Election
+        //can_contain Formation
+    }*/
+}
+
+node Objectives {
+    metamodel_element: Objectives
+    icon: "class"
+    default_size: 2.9 * 3		
+    minimum_size: 2.9 * 3
+    shape: RECTANGLE
+    name_position: UNDER
+    allowed_diagram_types: Node
+}
+
+node Task {
+    metamodel_element: Task
+    icon: "class"
+    default_size: 5 * 4
+    minimum_size: 5 * 4
+    shape: RECTANGLE
+    name_position: UNDER
+    keep_proportions: true
+    allowed_diagram_types: Node
+    
+    //container_options {
+        //can_contain Data in Task_ContainsData as_compartment 
+    //}
+}
+
+node ActivationProfile {
+    metamodel_element: ActivationProfile
+    icon: "artifact"
+    default_size: 3.7 * 2.9		
+    minimum_size: 3.7 * 2.9
+    shape: RECTANGLE
+    name_position: UNDER
+    keep_proportions: true
+    allowed_diagram_types: Node
+}
+
+node Data {
+    metamodel_element: Data
+    icon: "artifact"
+    default_size: 5 * 4
+    minimum_size: 5 * 4
+    //shape: RECTANGLE
+    name_position: UNDER
+    keep_proportions: true
+    allowed_diagram_types: Node
+    
+    container_options {
+    	can_contain Variable in Data_Variable as_compartment
+    }
+}
+
+node Variable {
+    metamodel_element: Variable
+    icon: "class"
+    default_size: 1 * 1	
+    minimum_size: 1 * 1
+    shape: RECTANGLE
+    name_position: UNDER
+    allowed_diagram_types: Node
+}
+
+
+node Sensor {
+    metamodel_element: Sensor
+    icon: "class"
+    default_size: 1.3 * 4	
+    minimum_size: 1.3 * 4
+    shape: RECTANGLE
+    name_position: UNDER
+    allowed_diagram_types: Node
+}
+
+node Actuator {
+    metamodel_element: Actuator
+    icon: "class"
+    default_size: 3.1 * 2		
+    minimum_size: 3.1 * 2
+    shape: RECTANGLE
+    name_position: UNDER
+    allowed_diagram_types: Node
+}
+
+node Timer {
+    metamodel_element: Timer
+    icon: "hourglass"
+    default_size: 2.4 * 3		
+    minimum_size: 2.4 * 3
+    shape: RECTANGLE
+    name_position: UNDER
+    allowed_diagram_types: Node
+}
+
+//statemachine
+node StateMachine {
+    metamodel_element: StateMachine
+    icon: "state"
+    shape: ROUNDED_RECTANGLE
+    default_size: 10 * 8
+    //minimum_size: 10 * 8
+    keep_proportions: false
+    name_position: INSIDE
+    allowed_diagram_types: StateMachine
+    
+    container_options {
+        can_contain State  
+        can_contain InitialState
+        can_contain FinalState
+        can_contain Transition                 
+    }
+}
+
+node State {
+    metamodel_element: State
+    icon: "state"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: INSIDE
+    allowed_diagram_types: StateMachine
+}
+
+node InitialState {
+    metamodel_element: InitialState
+    icon: "initial-state"
+    shape: ELLIPSE
+    default_size: 1 * 1
+    minimum_size: 1 * 1
+    keep_proportions: true
+    name_position: NO_NAME
+    allowed_diagram_types: StateMachine
+    
+    property FillColor: BLACK
+}
+
+node FinalState {
+    metamodel_element: FinalState
+    icon: "final-state"
+    shape: BULLS_EYE
+    default_size: 1 * 1
+    minimum_size: 1 * 1
+    keep_proportions: true
+    name_position: NO_NAME
+    allowed_diagram_types: StateMachine
+    
+    property FillColor: BLACK
+}
+
+//Activity
+node Activity {
+    metamodel_element: Activity
+    icon: "state"
+    shape: ROUNDED_RECTANGLE
+    default_size: 10 * 8
+    //minimum_size: 10 * 8
+    keep_proportions: false
+    name_position: INSIDE
+    allowed_diagram_types: Activity
+    
+    container_options {
+    	can_contain InitialNode in Activity_InitialNode
+    	can_contain FinalNode
+    	can_contain DecisionNode
+    	can_contain MergeNode
+        can_contain SensingAction  
+        can_contain ActuatingAction
+        can_contain TimingAction
+        can_contain OpaqueAction 
+ 		can_contain UpdatePoolAction 
+		can_contain GetNodeAction 
+		can_contain GetDataAction
+		can_contain RemoteTriggerAction                 
+    }
+}
+
+node InitialNode {
+    metamodel_element: InitialNode
+    icon: "initial-state"
+    shape: ELLIPSE
+    default_size: 1 * 1
+    minimum_size: 1 * 1
+    keep_proportions: true
+    name_position: NO_NAME
+    allowed_diagram_types: Activity Platform
+    
+    property FillColor: BLACK
+}
+
+node FinalNode {
+    metamodel_element: FinalNode
+    icon: "final-state"
+    shape: BULLS_EYE
+    default_size: 1 * 1
+    minimum_size: 1 * 1
+    keep_proportions: true
+    name_position: NO_NAME
+    allowed_diagram_types: Activity Platform
+    
+    property FillColor: BLACK
+}
+
+node DecisionNode {
+    metamodel_element: DecisionNode
+    icon: "decision-node"
+    shape: RHOMBUS
+    default_size: 2 * 2
+    minimum_size: 2 * 2
+    keep_proportions: true
+    name_position: NO_NAME
+    allowed_diagram_types: Activity Platform
+}
+
+node MergeNode {
+    metamodel_element: MergeNode
+    icon: "merge-node"
+    shape: RHOMBUS
+    default_size: 2 * 2
+    minimum_size: 2 * 2
+    keep_proportions: true
+    name_position: NO_NAME
+    allowed_diagram_types: Activity Platform
+}
+
+node SensingAction {
+    metamodel_element: SensingAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: UNDER
+    allowed_diagram_types: Activity Platform
+}
+
+node ActuatingAction {
+    metamodel_element: ActuatingAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+node TimingAction {
+    metamodel_element: TimingAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+node UpdatePoolAction {
+    metamodel_element: UpdatePoolAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+node GetNodeAction {
+    metamodel_element: GetNodeAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+node GetDataAction {
+    metamodel_element: GetDataAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+node RemoteTriggerAction {
+    metamodel_element: RemoteTriggerAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+node OpaqueAction {
+    metamodel_element: OpaqueAction
+    icon: "call-action"
+    shape: ROUNDED_RECTANGLE
+    default_size: 3 * 2
+    minimum_size: 3 * 2
+    keep_proportions: true
+    name_position: ABOVE
+    allowed_diagram_types: Activity Platform
+}
+
+//Platform
+node Aspect {
+    metamodel_element: Aspect
+    icon: "class"
+    shape: ROUNDED_RECTANGLE
+    default_size: 12 * 10
+    minimum_size: 12 * 10
+    keep_proportions: false
+    name_position: INSIDE
+    allowed_diagram_types: Platform
+    
+    container_options {
+        can_contain Pointcut
+        can_contain Advice 
+    }
+}
+
+node Pointcut {
+    metamodel_element: Pointcut
+    icon: "class"
+    shape: RECTANGLE
+    default_size: 3.1 * 2
+    minimum_size: 3.1 * 2
+    keep_proportions: true
+    name_position: UNDER
+    allowed_diagram_types: Platform
+}
+
+node Advice {
+    metamodel_element: Advice
+    icon: "state"
+    shape: ROUNDED_RECTANGLE
+    default_size: 10 * 8
+    //minimum_size: 10 * 8
+    keep_proportions: false
+    name_position: INSIDE
+    allowed_diagram_types: Platform
+    
+    container_options {
+    	can_contain InitialNode in Activity_InitialNode
+    	can_contain FinalNode
+    	can_contain DecisionNode
+    	can_contain MergeNode
+        can_contain SensingAction  
+        can_contain ActuatingAction
+        can_contain TimingAction
+        can_contain OpaqueAction 
+ 		can_contain UpdatePoolAction 
+		can_contain GetNodeAction 
+		can_contain GetDataAction
+		can_contain RemoteTriggerAction                 
+    }
+}
+
+node PlatformSlot {
+    metamodel_element: PlatformSlot
+    icon: "class"
+    shape: RECTANGLE
+    default_size: 12 * 10
+    minimum_size: 12 * 10
+    keep_proportions: false
+    name_position: INSIDE
+    allowed_diagram_types: Platform
+    
+    container_options {
+        can_contain Parameters 
+        can_contain Runtime
+        can_contain Resources
+        can_contain Battery
+        can_contain Activity
+    }
+}
+
+node Parameters {
+    metamodel_element: Parameters
+    icon: "class"
+    shape: RECTANGLE
+    default_size: 3.1 * 2.2
+    minimum_size: 3.1 * 2.2
+    keep_proportions: true
+    name_position: INSIDE
+    allowed_diagram_types: Platform
+    //property Color : WHITE
+}
+
+node Runtime {
+    metamodel_element: Runtime
+    icon: "class"
+    shape: RECTANGLE
+    default_size: 3.2 * 2.3
+    minimum_size: 3.2 * 2.3
+    keep_proportions: true
+    name_position: UNDER
+    allowed_diagram_types: Platform
+}
+
+node Resources {
+    metamodel_element: Resources
+    icon: "class"
+    shape: RECTANGLE
+    default_size: 3.2 * 3.3
+    minimum_size: 3.2 * 3.3
+    keep_proportions: true
+    name_position: UNDER
+    allowed_diagram_types: Platform
+}
+
+node Battery {
+    metamodel_element: Battery
+    icon: "class"
+    shape: RECTANGLE
+    default_size: 3.1 * 2.2
+    minimum_size: 3.1 * 2.2
+    keep_proportions: true
+    name_position: INSIDE
+    allowed_diagram_types: Platform
+}
+
+/********************Edges**********************/
+/*
+edge Messaging {
+		sources: Task
+		targets: Task
+		store_source_in Messaging_MsgSource
+		store_target_in Messaging_MsgTarget
+		metamodel_element: Messaging	
+		icon: "association-right"
+		at_target_draw: CLOSED_ARROW
+		line_style: SOLID
+		allowed_diagram_types: Node
+}
+*/
+edge DataLink {
+		sources: Task
+		targets: Data
+		store_source_in DataLink_Task
+		store_target_in DataLink_Data
+		metamodel_element: DataLink	
+		icon: "association-right"
+		at_target_draw: CLOSED_ARROW
+		line_style: SOLID
+		allowed_diagram_types: Node
+}
+
+edge Sensing {
+		sources: Task
+		targets: Sensor
+		store_source_in Sensing_Task
+		store_target_in Sensing_Sensor
+		metamodel_element: Sensing
+		icon: "association-right"
+		at_target_draw: CLOSED_ARROW
+		line_style: SOLID
+		allowed_diagram_types: Node
+}
+
+edge Actuating {
+		sources: Task
+		targets: Actuator
+		store_source_in Actuating_Task
+		store_target_in Actuating_Actuator
+		metamodel_element: Actuating
+		icon: "association-right"
+		at_target_draw: CLOSED_ARROW
+		line_style: SOLID
+		allowed_diagram_types: Node
+}
+
+edge Timing {
+		sources: Task
+		targets: Timer
+		store_source_in Timing_Task
+		store_target_in Timing_Timer
+		metamodel_element: Timing
+		icon: "association-right"
+		at_target_draw: CLOSED_ARROW
+		line_style: DASHED
+		allowed_diagram_types: Node
+}
+
+/*
+edge TransceiverLink {
+		sources: Task
+		targets: Transceiver
+		store_source_in TransceiverLink_Task
+		store_target_in TransceiverLink_Transceiver
+		metamodel_element: TransceiverLink
+		icon: "association-right"
+		at_target_draw: CLOSED_ARROW
+		at_source_draw: CLOSED_ARROW
+		line_style: DASHED
+		allowed_diagram_types: Node
+}
+*/
+
+edge Transition {
+	sources: State InitialState
+	targets: State FinalState
+	store_source_in Transition_TransitionFrom
+	store_target_in Transition_TransitionTo
+	metamodel_element: Transition
+	icon: "transition"
+	at_target_draw: OPEN_ARROW
+	line_style: SOLID
+	allowed_diagram_types: StateMachine
+}
+
+
+edge ActivityEdge {
+		//sources: InitialNode DecisionNode MergeNode SensingAction ActuatingAction TimingAction SendMessageAction UpdatePoolAction SubscribeAction HoodRefreshAction GetNodeAction RemoteTriggerAction OpaqueAction 
+		//targets: FinalNode DecisionNode MergeNode SensingAction ActuatingAction TimingAction SendMessageAction UpdatePoolAction SubscribeAction HoodRefreshAction GetNodeAction RemoteTriggerAction OpaqueAction
+		sources: InitialNode DecisionNode MergeNode SensingAction ActuatingAction TimingAction UpdatePoolAction GetNodeAction GetDataAction RemoteTriggerAction OpaqueAction 
+		targets: FinalNode DecisionNode MergeNode SensingAction ActuatingAction TimingAction UpdatePoolAction GetNodeAction GetDataAction RemoteTriggerAction OpaqueAction
+		store_source_in ActivityEdge_Source
+		store_target_in ActivityEdge_Target
+		metamodel_element: ActivityEdge 	
+		icon: "association-right"
+		at_target_draw: OPEN_ARROW
+		line_style: SOLID
+		allowed_diagram_types: Activity Platform
+}
+// end of diagram elements
+
+
+// properties	
+property Color {
+	type: Color
+	default_value: BLACK
+}
+	
+property FillColor {
+	type: Color
+	default_value: COLOR_RGB(255,255,255)
+	variable_name: "fill"
+}
+// end of properties
+
+// datatypes	
+datatype String mappedto "java.lang.String"
+datatype Boolean mappedto "java.lang.Boolean"
+datatype Integer mappedto "java.lang.Integer"
+datatype Color mappedto "java.awt.Color"
+// end of datatypes

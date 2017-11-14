@@ -1,0 +1,399 @@
+
+<project default="all-generate-copy-clean" basedir="." name="generate poseidon code from models">
+	<property file="generate-poseidon-code.properties" />
+    <property file="user_emf.properties" />
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant-contrib-1.0b3.jar" />
+
+	<!-- classpath -->	
+	<path id="base_classpath">
+		<fileset dir="lib" includes="*.jar" />		 
+		<pathelement location="${basedir}/workflow"/>
+		<fileset dir="${emf_libraries_path}" includes="*.jar" />
+	</path>
+	
+	<path id="prepare_metamodel_classpath">
+		<path refid="base_classpath"/>
+		<pathelement location="${prepare_metamodel_workflow_path}"/>
+        <pathelement location="${metamodel_bin_path}"/>
+		<pathelement location="${resources_bin_path}"/>
+		<fileset dir="${prepare_metamodel_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${dsl_libs_home}">
+			<include name="*.jar"/>
+		</fileset>		
+	</path>	
+	
+	<path id="diagram_classpath">
+		<path refid="base_classpath"/>
+		<pathelement location="${diagram_workflow_path}"/>
+		<fileset dir="${diagram_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>		
+		<fileset dir="${prepare_metamodel_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>
+		<pathelement location="${metamodel_bin_path}"/>
+	</path>
+	
+	<path id="tools_classpath">
+		<path refid="base_classpath"/>
+		<pathelement location="${tools_workflow_path}"/>				
+		<fileset dir="${tools_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<path id="rbutton_classpath">
+		<path refid="base_classpath"/>
+		<pathelement location="${rbutton_workflow_path}"/>		
+		<fileset dir="${rbutton_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<path id="erules_classpath">
+		<path refid="base_classpath"/>
+		<pathelement location="${erules_workflow_path}"/>		
+		<fileset dir="${erules_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>		
+	</path>
+	
+	<path id="properties_classpath">
+		<path refid="base_classpath"/>
+		<pathelement location="${properties_workflow_path}"/>
+		<fileset dir="${properties_workflow_path}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>	
+	
+	<path id="copyUtil_classpath">
+		<pathelement location="bin"/>
+		<fileset dir="../resources/lib">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<!-- prepare metamodel -->
+	<target name="prepare_metamodel_for_poseidon">
+		<echo message="running ${generator_helper_workflow_module_name}"/>
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="prepare_metamodel_classpath" fork="true">
+			<arg value="${generator_helper_workflow_module_name}"/>						
+			<arg value="-p"/>
+			<arg value="metamodelSrcDir=${metamodel_src_path}"/>
+			<arg value="-p"/>
+			<arg value="metamodelBinDir=${metamodel_bin_path}"/>
+			<arg value="-p"/>
+			<arg value="metamodelEmfPackageClass=${metamodel_emf_package_class}"/>
+		</java>
+		<delete dir="${metamodel_temp_bin_path}"/>
+		<mkdir dir="${metamodel_temp_bin_path}"/>
+		<javac srcdir="${metamodel_src_path}" destdir="${metamodel_temp_bin_path}" fork="true" target="1.5" defaultexcludes="false" failonerror="false" verbose="false">
+			<classpath refid="prepare_metamodel_classpath" />
+		</javac>
+		<if>
+			<available file="${metamodel_temp_bin_path}${file.separator}${generation_helper_class_name}.class"/>
+		        <then>
+		    		<copy todir="${metamodel_bin_path}">
+		    			<fileset dir="${metamodel_temp_bin_path}">
+		    				<include name="**/**"/>
+		    			</fileset>	
+		    		</copy>
+		        	<delete dir="${metamodel_temp_bin_path}"/>
+		        </then>
+				<else>
+					<echo message="Probably the build failed because the name of your java EMF package is wrong in file 'generators/user_emf.properties'."/>
+					<fail message="Probably the build failed because the name of your java EMF package is wrong in file 'generators/user_emf.properties'."/>
+				</else>
+		</if>
+		<echo message="running ${prepare_metamodel_workflow_module_name}"/>
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="prepare_metamodel_classpath" fork="true">
+			<arg value="${prepare_metamodel_workflow_module_name}"/>
+			<arg value="-p"/>
+			<arg value="metamodelTargetDir=${metamodel_src_path}"/>
+			<arg value="-p"/>
+			<arg value="mappingModelTargetDir=${models_gen_path}"/>			
+			<arg value="-p"/>
+			<arg value="metamodelEmfPackageClass=${metamodel_emf_package_class}"/>
+		</java>
+		
+	</target>
+
+	<path id="code_formatter_classpath">
+		<fileset dir="lib/code_formatter" >
+			<include name="*.jar"/>
+			<include name="*.xml"/>
+		</fileset>		
+	</path>
+	
+	<target name="format_generated_code">
+		<taskdef name="code-formatter" classname="com.darkedges.ant.JavaCodeFormatterTask" classpathref="code_formatter_classpath" />
+		<code-formatter config="lib/code_formatter/poseidon.generated.code.prefs" verbose="false">
+			<fileset dir="src-gen" includes="**/*.java" />
+		</code-formatter>
+	</target>
+	
+	<!-- diagram tasks -->
+	
+	<target name="diagram-generate">
+		<echo message="running ${diagram_workflow_module_name}"/>
+		<if>
+			<isset property="pluralize_getters_and_setters" />
+			<then>
+				<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="diagram_classpath" fork="true">
+					<arg value="${diagram_workflow_module_name}"/>
+					<arg value="-p"/>
+					<arg value="targetDir=${diagram_workflow_gen_path}"/>
+					<arg value="-p"/>
+					<arg value="modelPath=${models_gen_path}"/>			
+					<arg value="-p"/>
+					<arg value="metamodelEmfPackageClass=${metamodel_emf_package_class}"/>			
+					<arg value="-p"/>
+					<arg value="pluralizeGettersAndSetters=${pluralize_getters_and_setters}"/>
+				</java>
+			</then>
+			<else>
+				<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="diagram_classpath" fork="true">
+					<arg value="${diagram_workflow_module_name}"/>
+					<arg value="-p"/>
+					<arg value="targetDir=${diagram_workflow_gen_path}"/>
+					<arg value="-p"/>
+					<arg value="modelPath=${models_gen_path}"/>			
+					<arg value="-p"/>
+					<arg value="metamodelEmfPackageClass=${metamodel_emf_package_class}"/>
+				</java>				
+			</else>
+		</if>
+		<antcall target="format_generated_code"/>
+	</target>
+	
+	<target name="diagram-copy">
+		<copy todir="${diagram_destination_path}">
+			<fileset dir="${diagram_workflow_gen_path}">
+				<exclude name="com/gentleware/poseidon/repositorybase/*.*"/>
+				<exclude name="com/gentleware/poseidon/repositorybase"/>
+				<exclude name="com/gentleware/poseidon/dsldeltaengine/gen/*.*"/>
+				<exclude name="com/gentleware/poseidon/dsldeltaengine/gen"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/**"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/**/*.*"/>
+				<exclude name="com/gentleware/poseidon/diagrams/gen/factory/**/*.*"/>
+				<exclude name="com/gentleware/poseidon/diagrams/gen/base/DslGenElementRoles*"/>
+				<exclude name="com/gentleware/poseidon/diagrams/gen/base/DslGenSemanticElementManager*"/>				
+			</fileset>	
+		</copy>
+		<java classname="com.gentleware.poseidon.generation.GeneratedCodeCopyUtil" classpathref="copyUtil_classpath">
+			<arg value="${diagram_workflow_gen_path_impl}"/>
+			<arg value="${diagram_destination_path}"/>
+		</java>
+		<copy todir="${repository_destination_path}">
+			<fileset dir="${diagram_workflow_gen_path}">
+				<include name="com/gentleware/poseidon/repositorybase/*.*"/>
+				<include name="com/gentleware/poseidon/diagrams/gen/factory/*.*"/>
+				<include name="com/gentleware/poseidon/diagrams/gen/base/DslGenElementRoles*"/>
+				<include name="com/gentleware/poseidon/diagrams/gen/base/DslGenSemanticElementManager*"/>
+			</fileset>	
+		</copy>
+		<copy todir="${repository_browser_destination_path}">
+			<fileset dir="${diagram_workflow_gen_path}">
+				<include name="com/gentleware/poseidon/repobrowser/**/*.*"/>				
+			</fileset>	
+		</copy>		
+		<copy todir="${deltaengine_destination_path}">
+			<fileset dir="${diagram_workflow_gen_path}">
+				<include name="com/gentleware/poseidon/dsldeltaengine/gen/*.*"/>
+			</fileset>	
+		</copy>		
+	</target>
+	
+	<target name="diagram-generate-copy">
+		<antcall target="diagram-generate"/>
+		<antcall target="diagram-copy"/>
+	</target>
+	
+	<target name="diagram-generate-copy-clean">
+		<antcall target="diagram-generate-copy"/>
+		<antcall target="clear-gen-folders"/>
+	</target>
+	
+	<!-- poseidon tools model tasks -->	
+	<target name="tools-generate">
+		<echo message="running ${tools_workflow_module_name}"/>
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="tools_classpath" fork="true">
+			<arg value="${tools_workflow_module_name}"/>
+			<arg value="-p"/>
+			<arg value="targetDir=${tools_workflow_gen_path}"/>
+			<arg value="-p"/>
+			<arg value="modelPath=${models_gen_path}"/>
+		</java>
+		<antcall target="format_generated_code"/>
+	</target>
+	
+	<target name="tools-copy">
+		<copy todir="${tools_destination_path}">
+			<fileset dir="${tools_workflow_gen_path}"/>
+		</copy>
+		<java classname="com.gentleware.poseidon.generation.GeneratedCodeCopyUtil" classpathref="copyUtil_classpath">
+			<arg value="${tools_workflow_gen_path_impl}"/>
+			<arg value="${tools_destination_path}"/>
+		</java>
+	</target>
+	
+	<target name="tools-generate-copy">
+		<antcall target="tools-generate"></antcall>
+		<antcall target="tools-copy"></antcall>
+	</target>
+
+	<target name="tools-generate-copy-clean">
+		<antcall target="tools-generate"/>
+		<antcall target="tools-copy"/>
+		<antcall target="clear-gen-folders"/>
+	</target>
+
+	<!-- rapid button tasks -->	
+	<target name="rbutton-generate">
+		<echo message="running ${rbutton_workflow_module_name}"/>
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="rbutton_classpath" fork="true">
+			<arg value="${rbutton_workflow_module_name}"/>
+			<arg value="-p"/>
+			<arg value="targetDir=${rbutton_workflow_gen_path}"/>
+			<arg value="-p"/>
+			<arg value="modelPath=${models_gen_path}"/>
+		</java>
+		<antcall target="format_generated_code"/>
+	</target>
+	
+	<target name="rbutton-copy">
+		<copy todir="${rbutton_destination_path}">
+			<fileset dir="${rbutton_workflow_gen_path}"/>
+		</copy>
+	</target>
+	
+	<target name="rbutton-generate-copy">
+		<antcall target="rbutton-generate"></antcall>
+		<antcall target="rbutton-copy"></antcall>
+	</target>
+	
+	<target name="rbutton-generate-copy-clean">
+		<antcall target="rbutton-generate"/>
+		<antcall target="rbutton-copy"/>
+		<antcall target="clear-gen-folders"/>
+	</target>
+	
+	<!-- edge rules tasks -->	
+	<target name="erules-generate">
+		<echo message="running ${erules_workflow_module_name}"/>
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="erules_classpath" fork="true">
+			<arg value="${erules_workflow_module_name}"/>
+			<arg value="-p"/>
+			<arg value="targetDir=${erules_workflow_gen_path}"/>
+			<arg value="-p"/>
+			<arg value="modelPath=${models_gen_path}"/>
+		</java>
+		<antcall target="format_generated_code"/>
+	</target>
+	
+	<target name="erules-copy">
+		<copy todir="${erules_destination_path}">
+			<fileset dir="${erules_workflow_gen_path}"/>
+		</copy>
+	</target>
+	
+	<target name="erules-generate-copy">
+		<antcall target="erules-generate"></antcall>
+		<antcall target="erules-copy"></antcall>
+	</target>
+	
+	<target name="erules-generate-copy-clean">
+		<antcall target="erules-generate"/>
+		<antcall target="erules-copy"/>
+		<antcall target="clear-gen-folders"/>
+	</target>	
+	
+	<!-- properties tasks -->
+	<target name="properties-generate">
+		<echo message="running ${properties_workflow_module_name}"/>
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="properties_classpath" fork="true">
+			<arg value="${properties_workflow_module_name}"/>
+			<arg value="-p"/>
+			<arg value="targetDir=${properties_workflow_gen_path}"/>
+			<arg value="-p"/>
+			<arg value="modelPath=${models_gen_path}"/>
+		</java>
+		<antcall target="format_generated_code"/>
+	</target>
+	
+	<target name="properties-copy">
+		<copy todir="${properties_destination_path}">
+			<fileset dir="${properties_workflow_gen_path}">
+				<exclude name="com/gentleware/poseidon/repobrowser"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/viewer"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/viewer/table/*.*"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/viewer/table"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/viewer/table/ui/*.*"/>
+				<exclude name="com/gentleware/poseidon/repobrowser/viewer/table/ui"/>					
+			</fileset>
+		</copy>
+		<copy todir="${tableviewer_destination_path}">
+			<fileset dir="${properties_workflow_gen_path}">
+				<include name="com/gentleware/poseidon/repobrowser/viewer/table/*.*"/>
+			</fileset>	
+		</copy>				
+	</target>
+	
+	<target name="properties-generate-copy">
+		<antcall target="properties-generate"></antcall>
+		<antcall target="properties-copy"></antcall>
+	</target>	
+	
+	<target name="properties-generate-copy-clean">
+		<antcall target="properties-generate"/>
+		<antcall target="properties-copy"/>
+		<antcall target="clear-gen-folders"/>
+	</target>	
+
+	<!-- global tasks -->
+	<target name="all-generate">
+		<antcall target="diagram-generate"></antcall>
+		<antcall target="tools-generate"></antcall>
+		<antcall target="rbutton-generate"></antcall>
+		<antcall target="erules-generate"></antcall>
+		<antcall target="properties-generate"></antcall>
+	</target>
+	
+	<target name="all-copy">
+		<antcall target="diagram-copy"></antcall>
+		<antcall target="tools-copy"></antcall>
+		<antcall target="rbutton-copy"></antcall>
+		<antcall target="erules-copy"></antcall>
+		<antcall target="properties-copy"></antcall>
+	</target>
+
+	<target name="all-generate-copy">
+		<antcall target="prepare_metamodel_for_poseidon"></antcall>
+		<antcall target="diagram-generate-copy"></antcall>
+		<antcall target="tools-generate-copy"></antcall>
+		<antcall target="rbutton-generate-copy"></antcall>
+		<antcall target="erules-generate-copy"></antcall>
+		<antcall target="properties-generate-copy"></antcall>
+	</target>
+	
+	<target name="all-generate-copy-clean">
+		<antcall target="all-generate-copy"/>
+		<antcall target="clear-gen-folders"/>
+	</target>
+	
+	<target name="clear-gen-folders">
+		<delete includeemptydirs="true" verbose="true" failonerror="false">
+			<fileset dir="${diagram_workflow_gen_path}" includes="**/*" defaultexcludes="false"/>
+			<fileset dir="${diagram_workflow_gen_path_impl}" includes="**/*" defaultexcludes="false"/>
+			<fileset dir="${tools_workflow_gen_path}" includes="**/*" defaultexcludes="false"/>
+			<fileset dir="${tools_workflow_gen_path_impl}" includes="**/*" defaultexcludes="false"/>
+			<fileset dir="${rbutton_workflow_gen_path}" includes="**/*" defaultexcludes="false"/>
+			<fileset dir="${erules_workflow_gen_path}" includes="**/*" defaultexcludes="false"/>
+			<fileset dir="${properties_workflow_gen_path}" includes="**/*" defaultexcludes="false"/>
+		</delete>
+
+	</target>
+
+</project>

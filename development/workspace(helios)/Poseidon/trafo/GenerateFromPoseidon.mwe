@@ -1,0 +1,130 @@
+<workflow>
+
+<property name="workModel" value="gen-artifacts/workModel.xmi"/>
+<property name="wsnPSMModel" value="gen-artifacts/genPSMModel.xmi"/>
+<property name="aspectModel" value="gen-aspect/newAspect.xmi"/>
+<property name="workspaceRoot" value="D:/Dropbox/Poseidon/workspace"/>
+<property name="m2tPath" value="D:/Dropbox/thesisTools/contiki-2.7/phd/m2t"/>
+
+	<!-- write the model to temp file. This is to avoid pollutinig the model in the repo -->
+	<component id="validatedSlot2File" class="org.eclipse.emf.mwe.utils.Writer">
+		<modelSlot value="model"/>
+        <uri value="${workModel}" />
+	</component>
+
+	<!-- Read work model from file into slot -->
+	<component id="reading model" class="org.eclipse.emf.mwe.utils.Reader">
+  		<uri value="gen-artifacts/workModel.xmi"/>
+    	<modelSlot value="workModelSlot"/>
+    	<!-- <ignoreMissingModel value="true"/> -->
+	</component> 
+	
+	<!--remove deteleted elements -->
+	<component class="org.eclipse.xtend.XtendComponent">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<invoke value="templates::m2m::removeDeleted(workModelSlot)"/> 
+		<outputSlot value="cleanedModelSlot"/>
+	</component>
+	
+	<!--validate the PIM -->
+	<component class="org.eclipse.xtend.check.CheckComponent">
+		<metaModel id="mm" class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel">
+  		</metaModel> 
+		<checkFile value="models::wsn-constraints"/>
+ 		<emfAllChildrenSlot value="cleanedModelSlot"/>
+ 		<abortOnError value="true"/>
+	</component>
+	
+	<!-- Read platform model from a file and put it in a model slot -->
+	<component id="reading platform model" class="org.eclipse.emf.mwe.utils.Reader">  		
+  		<uri value="gen-platform/platform.xmi"/>
+    	<modelSlot value="platform"/>
+    	<!-- <ignoreMissingModel value="true"/> -->
+	</component>
+	
+	<!--transform model -->
+	<component class="org.eclipse.xtend.XtendComponent">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<invoke value="templates::m2m::weave(cleanedModelSlot, platform)"/> 
+		<outputSlot value="modelPSM"/>
+	</component>
+	
+	<!--write the new model (PSM) to file-->
+	<!-- Writing the gen psm model to file is not necessary. It's already in a slot to used by the next component -->
+	<component id="slotPSM2File" class="org.eclipse.emf.mwe.utils.Writer">
+		<modelSlot value="modelPSM"/>
+        <uri value="${wsnPSMModel}" />
+	</component>
+	
+	<!--validate the Generated PSM -->
+	
+	<!--Generate source code-->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::tasks::main FOR modelPSM"/>
+		<!-- <outlet path="gen-artifacts"> --> 
+		<outlet path="D:/Dropbox/thesisTools/contiki-2.7/phd/m2t">
+		</outlet>
+	</component>
+	
+	<!--Generate source header -->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::wsn::main FOR modelPSM"/>
+		<!-- <outlet path="gen-artifacts"> --> 
+		<outlet path="D:/Dropbox/thesisTools/contiki-2.7/phd/m2t">
+		</outlet>
+	</component>
+	
+	<!--Generate makefile -->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::makefile::main FOR modelPSM"/>
+		<!-- <outlet path="gen-artifacts"> -->
+		 <outlet path="D:/Dropbox/thesisTools/contiki-2.7/phd/m2t">
+		</outlet>
+	</component>
+	
+	<!--Generate data query function -->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::neighbors_data::main FOR modelPSM"/>
+		<!-- <outlet path="gen-artifacts"> -->
+		 <outlet path="D:/Dropbox/thesisTools/contiki-2.7/phd/m2t">
+		</outlet>
+	</component>
+	
+	<!--Generate runtime -->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::runtime::main FOR modelPSM"/>
+		<!-- <outlet path="gen-artifacts"> -->
+		<!-- <outlet path="D:/Dropbox/thesisTools/contiki-2.7/phd/m2t"> -->
+		 <outlet path="${m2tPath}">
+		</outlet>
+	</component>
+	
+	<!--Generate objectives -->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::objectives::main FOR modelPSM"/>
+		 <outlet path="${m2tPath}">
+		</outlet>
+	</component>
+	
+	<!-- project-conf.h -->
+	<component class="org.eclipse.xpand2.Generator">
+		<metaModel class="org.eclipse.xtend.typesystem.emf.EmfRegistryMetaModel"/>
+		<fileEncoding value="Cp1252"/>
+		<expand value="templates::projectconf::main FOR modelPSM"/>
+		 <outlet path="${m2tPath}">
+		</outlet>
+	</component>
+
+</workflow>

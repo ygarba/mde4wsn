@@ -1,0 +1,26 @@
+«IMPORT dsl»
+
+«EXTENSION extensions::MetamodelHelper»
+
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FILE "wsnModelOutPut.txt"-»
+«EXPAND modelItems FOR this»
+«ENDFILE»
+«ENDDEFINE»
+
+«DEFINE modelItems FOR dsl::PoseidonCoreRootElement-»
+********** Info About the Project **********
+
+Elements Type
+-------------
+«FOREACH __ownedMember AS ownedMember-»
+«ownedMember.getName().toString()» --> «ownedMember.metaType.toString()»
+«ENDFOREACH»
+
+Relations
+-------------
+«FOREACH __ownedMember AS ownedMember-»
+«ownedMember.getName().toString()» --> «ownedMember.getIncomingRelationships().toString()»
+«ENDFOREACH»
+
+«ENDDEFINE»

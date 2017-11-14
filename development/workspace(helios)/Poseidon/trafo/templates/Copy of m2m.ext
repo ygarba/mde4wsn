@@ -1,0 +1,85 @@
+import dsl;
+import wsn;
+
+extension extensions::MetamodelHelper;
+extension extensions::Pointcut;
+
+Void removeDeleted(PoseidonCoreRootElement m) :
+	m.__ownedMember.removeAll(m.__ownedMember.select(e|e.j_deleted == 1)) ->
+	m;
+	
+Void weave(PoseidonCoreRootElement m, PoseidonCoreRootElement n) :
+	let pointcut = n.__ownedMember.typeSelect(Aspect).eContents.typeSelect(Pointcut):
+	weaveRoot(m, GetAdvices(n, wsn::pointcutType::root), pointcut) ->
+	m.__ownedMember.addAll(n.eAllContents.typeSelect(Aspect)) ->
+		
+	//weaveSensor(m, GetAdvices(n, wsn::pointcutType::sensor), pointcut) ->
+	//weaveSensor(m, GetAdvices(n, wsn::pointcutType::sensor), GetPointcuts(n, wsn::pointcutType::sensor)) ->
+	//weaveActuator(m, GetAdvices(n, wsn::pointcutType::actuator), GetPointcuts(n, wsn::pointcutType::actuator)) ->
+	//weaveActuator(m, GetAdvices(n, wsn::pointcutType::actuator), pointcut) ->
+	//weaveState(m, GetAdvices(n, wsn::pointcutType::state), pointcut) ->
+	//weaveData(m, GetAdvices(n, wsn::pointcutType::data), pointcut) ->
+	n ->
+	m;
+
+List GetAdvices(PoseidonCoreRootElement n, wsn::pointcutType t):
+	n.__ownedMember.typeSelect(Aspect).eContents.typeSelect(Advice)
+		.select(e|e.eContainer.eContents.typeSelect(Pointcut)
+			.exists(e|e.type == t)).eContents;
+			
+List GetPointcuts(PoseidonCoreRootElement n, wsn::pointcutType t):
+	n.__ownedMember.typeSelect(Aspect).eContents.typeSelect(Pointcut).select(e|e.type == t);
+
+weaveRoot(PoseidonCoreRootElement m, List advices, List pointcuts):
+	pointcuts.exists(e|e.type == wsn::pointcutType::root) ? (
+		m.__ownedMember.addAll(advices)
+		):
+	m;
+	
+//weaveSensor(PoseidonCoreRootElement m, List advices, List pointcuts):
+		//m.__ownedMember.typeSelect(Sensor).setInterface(advices.get(0));	//tentative, need to add
+		
+
+weaveActuator(PoseidonCoreRootElement m, List advices, List pointcuts):
+	let jp = m.__ownedMember.typeSelect(Actuator):
+		jp.id == "sprinkler101" ? (
+			m.__ownedMember.addAll(advices) ->		//for debug only
+			m.__ownedMember.addAll(pointcuts)):
+	m;
+	
+weaveSensor(PoseidonCoreRootElement m, List advices, List pointcuts):
+	let jp = m.__ownedMember.typeSelect(Sensor):
+		jp.forAll(e|e.id == "adxl362") ? (
+			m.__ownedMember.addAll(advices) ->		//for debug only
+			m.__ownedMember.addAll(pointcuts)):
+
+	m;
+	
+	
+weaveState(PoseidonCoreRootElement m, List advices, List pointcuts):
+	m;
+	
+weaveData(PoseidonCoreRootElement m, List advices, List pointcuts):
+	m;
+		
+addSM(wsn::Task this):
+	behavior.setName("myBehave");
+	
+		
+private create Task this createTask() :	
+	this.setPriority(66) ->
+	this.setBehavior(createStateMachine());
+
+private create StateMachine this createStateMachine() :
+	this.setName("newSM");
+
+	
+Void anotherFunc(PoseidonCoreRootElement n) :
+	let t = new Task :
+		t.setPriority(50) ->
+		t.setName("newTask") ->
+n;
+		
+	
+	
+	

@@ -1,0 +1,40 @@
+<project name = "post build editor" default="all">
+	<property name="scr.dir" value="${user.dir}"/>
+	<property name="dest.dir" value="../target/dist"/>
+	
+	<target name="all" depends="copy.platform.folder, copy.trafo.contents, copy.images.to.lib, copy.opaque.src">
+		<antcall target="copy.platform.folder"/>
+		<antcall target="copy.trafo.contents"/>
+		<antcall target="copy.images.to.lib"/>
+		<antcall target="copy.opaque.src"/>
+	</target>
+	
+	<target name="copy.platform.folder">
+		<mkdir dir="${dest.dir}/gen-platform"/>
+		<copy todir="${dest.dir}/gen-platform" >  
+		  <fileset dir="${user.dir}/gen-platform"/>  
+		</copy>
+	</target>
+	
+	<target name="copy.trafo.contents">
+			<copy todir="${dest.dir}" >  
+			        <fileset dir="${user.dir}/trafo" includes="**"/>  
+			 </copy>
+	</target>
+	<!--
+    <target name="make images jar">
+        <jar destfile="../target/dist/lib/wsnImages.jar" basedir="${user.dir}/images">
+        </jar>
+    </target>
+    -->
+	<target name="copy.images.to.lib">
+		<copy todir="${dest.dir}/lib" >  
+			<fileset dir="../resources/icons" includes="**"/>  
+		</copy>
+	</target>
+	<target name="copy.opaque.src">
+			<copy todir="${dest.dir}/opaque" >  
+				<fileset dir="${user.dir}/opaque" includes="**"/>  
+			</copy>
+	</target>
+</project>

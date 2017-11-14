@@ -1,0 +1,37 @@
+//Yau, 28th Feb., 2014
+model Properties 
+import "PoseidonDiagramModel.dgm";
+
+/*On the other hand, the name of the token doesn't make sense in Petri nets, so we do not
+really want to show it. Open the Properties model (Poseidon/models/Properties.prt)
+and add the following definition there:*/
+
+/*
+attribute {
+name: "containsData"
+included_elements: Task
+} */
+
+/*
+reference {
+name: "behavior"
+included_elements: Task
+}
+
+reference {
+name: "trigger"
+included_elements: Transition
+}
+*/
+
+/*
+reference {
+name: "entryActivity"
+included_elements: State
+}
+
+reference {
+name: "exitActivity"
+included_elements: State
+}
+*/

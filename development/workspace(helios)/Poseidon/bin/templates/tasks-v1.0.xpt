@@ -1,0 +1,259 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FOREACH __ownedMember.typeSelect(wsn::Task).select(e|e.j_deleted != 1) AS e-»
+«FILE "task_" + e.getName() + ".c"»
+/****************************************************
+* Generated code for task -> «e.getName()» 
+*****************************************************/	
+#include "contiki.h"
+#include <stdio.h>
+#include "net/netstack.h"
+#include "net/rime.h"
+
+#include "qepn.h"
+#include "dev/leds.h"
+//#include "qpn_port.h"
+//#include "bsp.h"
+
+#include "task_«e.getName()-».h"	//include my header for starting me
+#include "TMP102.h"		//ToDo: autogen it
+#include "z1Led.h"		//ToDo: autogen it
+
+//Remember -> #define PROCESS_NAME(name) extern struct process name
+«FOREACH e.getOutgoingRelationships().typeSelect(Messaging) AS t-»
+extern struct process «t.msgTarget.getName()-»_process;	//needed to post message to this task
+«ENDFOREACH-»
+
+«FOREACH e.getOutgoingRelationships().typeSelect(Sensing).sensor AS s-»
+struct «s.id»_data *«s.getName().toUpperCase()-»_Data;	//this is the global defination of data buffer for this sensor
+«ENDFOREACH-»
+
+«FOREACH e.getOutgoingRelationships().typeSelect(Actuating).actuator AS a-»
+struct «a.id»_data «a.getName().toUpperCase()-»_Data;	//this is the global defination for actuator data
+«ENDFOREACH-»
+
+enum «e.behaviorName-»Events {
+    OFFSET_EVT = Q_USER_SIG,
+    OFFSET2_EVT = 150,
+«FOREACH eAllContents.typeSelect(Messaging) AS evt-»
+	«evt.getName().toUpperCase()-»_EVT, 
+«ENDFOREACH-»
+«FOREACH eAllContents.typeSelect(TransceiverLink) AS evt-»
+	«evt.getName().toUpperCase()-»_EVT, 
+«ENDFOREACH-»
+«FOREACH eAllContents.typeSelect(Timing) AS evt-»
+	«evt.getName().toUpperCase()-»_EVT = PROCESS_EVENT_TIMER, 
+«ENDFOREACH-»
+    NULL_EVT = 254		//for automatic transition after entry action completion
+};
+
+typedef struct «e.behaviorName.toUpperCase()»Tag {
+    QFsm super;
+    void *data;	//data extracted from event and passed to SM
+} «e.behaviorName»;		//derived from QFsm
+
+«e.behaviorName» «e.behaviorName.toLowerCase()»;		//SM object
+
+/*---------------- Process Declaration -------------------*/
+PROCESS(«e.getName()-»_process, "«e.getName()-»");
+//AUTOSTART_PROCESSES(&«e.getName()-»_process);
+/*--------------------------------------------------------*/
+
+«IF e.getOutgoingRelationships().typeSelect(TransceiverLink).size != 0-»
+/*------------------Broadcast Receive---------------------*/
+static void
+broadcast_recv(struct broadcast_conn *c, const rimeaddr_t *from)
+{
+«FOREACH eAllContents.typeSelect(TransceiverLink) AS evt-»
+	process_post(&«e.getName()-»_process, «evt.getName().toUpperCase()-»_EVT, packetbuf_dataptr()); //packet buffer pointer sent as event data
+«ENDFOREACH-»
+}
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
+static struct broadcast_conn broadcast;
+/*---------------------------------------------------------*/
+«ENDIF-»
+/*------------------- helper functions -------------------*/
+//Timers declare
+«FOREACH e.getOutgoingRelationships().typeSelect(Timing) AS tm-»
+static struct etimer «tm.timer.getName()-»;
+void «e.getName()-»_armTimer()
+{
+   PROCESS_CONTEXT_BEGIN(&«e.getName()-»_process);
+   etimer_set(&«tm.timer.getName()-», CLOCK_SECOND*«tm.timer.time»);
+   PROCESS_CONTEXT_END(&«e.getName()-»_process);
+}
+«ENDFOREACH»
+//Messaging declare
+void «e.getName()-»_postMessage(struct process * target, process_event_t post_event, void *data)
+{ 
+   	PROCESS_CONTEXT_BEGIN(&«e.getName()-»_process);
+   	process_post(target, post_event, data);
+   	PROCESS_CONTEXT_END(&«e.getName()-»_process);
+}
+«IF e.getOutgoingRelationships().typeSelect(TransceiverLink).size != 0-»
+//Comm declare
+void «e.getName()-»_sendPacket(void *data, uint16_t dataLen)
+{
+	PROCESS_CONTEXT_BEGIN(&«e.getName()-»_process);	//to initiate packet arrival event
+   	packetbuf_copyfrom(data, dataLen);
+    broadcast_send(&broadcast);
+   	PROCESS_CONTEXT_END(&«e.getName()-»_process);
+}
+«ENDIF-»
+/*--------------------------------------------------------*/
+
+//SM prototypes
+void «e.behaviorName»_ctor(«e.behaviorName-» *me);
+static QState «e.behaviorName»_initial(«e.behaviorName» *me);
+«REM»«EXPAND _smPrototypes FOR e.behavior-»«ENDREM»
+«EXPAND _smPrototypes FOR eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0)-»
+
+//State Definations
+void «e.behaviorName»_ctor(«e.behaviorName» *me){
+    QFsm_ctor(&me->super, (QStateHandler)&«e.behaviorName»_initial);
+}
+
+QState «e.behaviorName»_initial(«e.behaviorName» *me){ 
+    «FOREACH eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0).eContents.typeSelect(InitialState).getOutgoingRelationships().typeSelect(Transition) AS st-»
+    «REM» ToDo: fix -> return Q_TRAN(&«st.transitionTo.getName()-»); «ENDREM»
+    «ENDFOREACH-»
+    return Q_TRAN(&«e.behaviorName-»_«eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0).eContents.typeSelect(InitialState).get(0).getOutgoingRelationships().typeSelect(Transition).get(0).transitionTo.getName()-»);
+}
+
+«EXPAND _smFunctions FOR eAllContents.typeSelect(StateMachine).select(el|el.getName()==e.behaviorName).get(0)-»
+
+/*------------------ Process Def -------------------------*/
+PROCESS_THREAD(«e.getName()-»_process, ev, data)
+{
+	PROCESS_BEGIN();
+  	«IF e.getOutgoingRelationships().typeSelect(TransceiverLink).size != 0-»
+  	broadcast_open(&broadcast, 129, &broadcast_call);
+  	«ENDIF-»
+  	«FOREACH e.getOutgoingRelationships().typeSelect(Sensing).sensor AS s-»
+	«s.getName().toUpperCase()-»_Data = (struct «s.id»_data*)«s.id»_Configure();	//sensor activated
+	«ENDFOREACH-»
+	«FOREACH e.getOutgoingRelationships().typeSelect(Actuating).actuator AS s-»
+	«s.id»_Configure(«s.getName().toUpperCase()-»_Data);	//actuator activated
+	«ENDFOREACH-»
+  	«e.behaviorName-»_ctor(&«e.behaviorName.toLowerCase()-»);
+  	QFsm_init((QFsm *)&«e.behaviorName.toLowerCase()-»); //trigger initial transistion in this object
+  
+  	while(1){
+		PROCESS_WAIT_EVENT();
+		printf("«e.getName()» event dispatched ...\n\r");
+		(&«e.behaviorName.toLowerCase()»)->data = data;	//insert event data pointer in sm object
+		Q_SIG(&«e.behaviorName.toLowerCase()») = ev;
+		QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		
+		/*
+		* The reason for this secondary dispatch is for NULL event.
+		* The number of if's detetmines the length of chain of NULL events possible. Now two!
+		*/
+		if (Q_SIG(&«e.behaviorName.toLowerCase()») == NULL_EVT) { //means completion of entry action automatically triggers transition, i.e. NULL event
+		  QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		}
+		
+		if (Q_SIG(&«e.behaviorName.toLowerCase()») == NULL_EVT) { //means completion of entry action automatically triggers transition, i.e. NULL event
+		  QFsm_dispatch((QFsm *)&«e.behaviorName.toLowerCase()»);
+		}
+  }
+
+  PROCESS_END();
+}
+/*--------------------------------------------------------*/
+/*-----------------Process Starting Functions-------------*/
+void «e.getName()-»_start()
+{
+  process_start(&«e.getName()-»_process, NULL);
+}
+/*--------------------------------------------------------*/
+
+«ENDFILE»
+«ENDFOREACH»
+«ENDDEFINE»
+
+-------------------------------------------------------
+
+/***** StateMachine *****/
+«DEFINE _smPrototypes FOR wsn::StateMachine-»
+«FOREACH this.eContents.typeSelect(State).reject(e|e.getName().contains("Initial") || e.getName().contains("Final")) AS st-»
+static QState «this.getName()-»_«st.getName()-»(«this.getName()-» *me);
+«ENDFOREACH-»
+«ENDDEFINE»
+
+«DEFINE _smFunctions FOR wsn::StateMachine-»
+«FOREACH this.eContents.typeSelect(State).reject(e|e.getName().contains("Initial") || e.getName().contains("Final")) AS st-»
+QState «this.getName()-»_«st.getName()-»(«this.getName()-» *me){
+	switch (Q_SIG(me)) {
+	        case Q_ENTRY_SIG: {
+	        	//EntryAction.Activity -> «st.entryAction.activity.getName()-»;
+	        	«IF st.entryAction.type == wsn::ActionType::TimerArm-»
+	        	«eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getName()-»_armTimer();
+	        	«ELSEIF st.entryAction.type == wsn::ActionType::MessagePost-»
+	        	«LET eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getOutgoingRelationships().typeSelect(Messaging).get(0) AS m-»	        	      
+	        	«eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getName()-»_postMessage(&«m.msgTarget.getName()-»_process, «m.getName().toUpperCase()-»_EVT, NULL);	        	
+	        	«ENDLET-»
+	        	«ELSEIF st.entryAction.type == wsn::ActionType::RadioSend-»
+	        	«eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getName()-»_sendPacket();	        		        
+	        	«ELSEIF st.entryAction.type == wsn::ActionType::Sensing-»
+	        	«LET eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0) AS t-»
+	        	«t.getOutgoingRelationships().typeSelect(Sensing).sensor.get(0).id-»_Get();	//sensor asked to get new data and place it in buffer
+	        	«ENDLET-»
+	        	«ELSEIF st.entryAction.type == wsn::ActionType::Actuating-»
+	        	«LET eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0) AS t-»
+	        	«t.getOutgoingRelationships().typeSelect(Actuating).actuator.get(0).id-»_Set(«t.getOutgoingRelationships().typeSelect(Actuating).actuator.get(0).getName().toUpperCase()»_Data);	//actuator asked to update
+	        	«ENDLET-»
+	        	«ENDIF-»	 
+	        	«IF st.getOutgoingRelationships().typeSelect(Transition).exists(e|e.triggerName.toUpperCase() == "NULL")»
+	        	Q_SIG(&«this.getName().toLowerCase()») = NULL_EVT;
+	        	«ENDIF-»       	 
+	            return Q_HANDLED();
+	        }
+	        case Q_EXIT_SIG: {
+	            //ExitAction.Activity -> «st.exitAction.activity.getName()-»;
+	            «IF st.exitAction.type == wsn::ActionType::TimerArm-»
+	        	«eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getName()-»_armTimer();
+	        	«ELSEIF st.exitAction.type == wsn::ActionType::MessagePost-»
+	        	«LET eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getOutgoingRelationships().typeSelect(Messaging).get(0) AS m-»	        	      
+	        	«eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getName()-»_postMessage(&«m.msgTarget.getName()-»_process, «m.getName().toUpperCase()-»_EVT, NULL);	        	
+	        	«ENDLET-»
+	        	«ELSEIF st.exitAction.type == wsn::ActionType::RadioSend-»
+	        	«eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0).getName()-»_sendPacket();	        		        
+	        	«ELSEIF st.exitAction.type == wsn::ActionType::Sensing-»
+	        	«LET eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0) AS t-»
+	        	«t.getOutgoingRelationships().typeSelect(Sensing).sensor.get(0).id-»_Get();	//sensor asked to get new data and place it in buffer
+	        	«ENDLET-»
+	        	«ELSEIF st.exitAction.type == wsn::ActionType::Actuating-»
+	        	«LET eRootContainer.eAllContents.typeSelect(Task).select(e|e.behaviorName == st.eContainer.getName()).get(0) AS t-»
+	        	«t.getOutgoingRelationships().typeSelect(Actuating).actuator.get(0).id-»_Set(«t.getOutgoingRelationships().typeSelect(Actuating).actuator.get(0).getName().toUpperCase()»_Data);	//actuator asked to update
+	        	«ENDLET-»
+	        	«ENDIF-»	 
+	            return Q_HANDLED();
+	        }
+	 «FOREACH st.getOutgoingRelationships().typeSelect(Transition) AS tran-» 
+	        case «tran.triggerName.toUpperCase()-»_EVT: {
+	            return Q_TRAN(&«this.getName()-»_«tran.transitionTo.getName()-»);
+	        }    
+	 «ENDFOREACH-»
+	    }
+    return Q_IGNORED();
+}
+
+«ENDFOREACH-»
+«ENDDEFINE»
+/***** StateMachine Ends *****/
+ 
+ -------------------------------------------------
+«REM»
+«DEFINE _timerDeclare FOR wsn::Timing-»
+ 	static struct etimer «this.timer.getName()»; /* etimer_set(&«this.timer.getName()», CLOCK_SECOND*«this.timer.time.toInteger()»); */
+«ENDDEFINE»
+ 
+
+
+«DEFINE _led FOR wsn::Actuating-»
+		«this.actuator.getName()»_toggle(); //«this.getName()»
+«ENDDEFINE»
+«ENDREM»

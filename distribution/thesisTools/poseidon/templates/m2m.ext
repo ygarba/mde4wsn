@@ -1,0 +1,46 @@
+import dsl;
+import wsn;
+
+extension extensions::MetamodelHelper;
+extension extensions::Composition;
+
+Void removeDeleted(PoseidonCoreRootElement m) :
+	m.__ownedMember.removeAll(m.__ownedMember.select(e|e.j_deleted == 1)) ->
+	m;
+	
+Void weave(PoseidonCoreRootElement m, PoseidonCoreRootElement n) :
+	LiftingCopySlot(m, n) ->
+	LiftingCopyElements(m, n) ->
+	composition(m, n) ->
+	m;
+	
+Void LiftingCopySlot(PoseidonCoreRootElement m, PoseidonCoreRootElement n) :
+	let pSlot = n.__ownedMember.typeSelect(PlatformSlot):
+		m.__ownedMember.addAll(pSlot) ->
+n ->
+m;
+	
+Void LiftingCopyElements(PoseidonCoreRootElement m, PoseidonCoreRootElement n) :
+	let platformElements = n.__ownedMember.typeSelect(PlatformSlot).eContents:
+		m.__ownedMember.typeSelect(PlatformSlot).addAll(platformElements) ->
+n ->
+m;
+	
+Void composition(PoseidonCoreRootElement m, PoseidonCoreRootElement n) :
+	let jointponts = m.__ownedMember.typeSelect(Activity).select(e|e.isJointPoint == true):
+		let aspects = n.__ownedMember.typeSelect(Aspect):
+			let m = m2mComposition(m, jointponts, aspects):
+m;
+
+Void composition2(PoseidonCoreRootElement m, PoseidonCoreRootElement n) :
+	let jp = m.__ownedMember.typeSelect(Activity).select(e|e.isJointPoint == true):
+		let pc = n.__ownedMember.eContents.typeSelect(Pointcut):
+			jp.exists(e|e.getName() == "DataReduction") && pc.exists(e|e.expression == "Display") ? (
+				jp.setIn("wiw!") ->
+				jp.get(1).setOut("wow!")
+				) : (
+						jp.setIn("kik!") -> 
+						jp.setOut("kok!")
+					) ->
+m;
+	

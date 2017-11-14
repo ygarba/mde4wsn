@@ -1,0 +1,96 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FILE "wsnApp.code.c"-»
+#include "Yau.h"
+
+/***** List All Elements *******/
+«FOREACH __ownedMember AS e-»
+«EXPAND _elements FOR e-»
+«ENDFOREACH»
+/***** end of elements *******/
+
+«FOREACH __ownedMember.typeSelect(wsn::Task) AS e-»
+******** «e.getName().toString()-» **********	
+«EXPAND _task FOR e-»
+«ENDFOREACH»
+
+*** Aspects are ******
+«FOREACH __ownedMember.typeSelect(wsn::Aspect) AS e-»
+«EXPAND _aspect FOR e-»
+«ENDFOREACH»
+
+«FOREACH __ownedMember.typeSelect(wsn::Sensor) AS e-»
+«EXPAND _sensor FOR e-»
+«ENDFOREACH»
+
+«ENDFILE»
+
+«FILE "wsnApp.task.c"-»
+«FOREACH __ownedMember.typeSelect(wsn::Task) AS e-»
+******** «e.getName().toString()-» **********	
+«EXPAND _task FOR e-»
+«ENDFOREACH»
+«ENDFILE»
+
+«ENDDEFINE»
+
+/******** Defines ***********/
+
+ «DEFINE _elements FOR Object-»
+ 	Name = "«this.getName()»" 	
+ 	Object = "«this.toString()»" 
+ «ENDDEFINE»
+ 
+ «DEFINE _task FOR wsn::Task-»
+ --- «this.getName()» contents" 	
+ 	--- Incoming ---
+ 	«LET this.getIncomingRelationships() AS m-»
+ 		«FOREACH m AS n»
+ 			«n.getName()», «n.metaType.toString()»
+ 		«ENDFOREACH»
+ 	«ENDLET»
+ 	--- Outgoing ---
+ 	«LET this.getOutgoingRelationships() AS m-»
+ 		«FOREACH m AS n»
+ 			«n.getName()», «n.metaType.toString()»
+ 		«ENDFOREACH»
+ 	«ENDLET»
+ 	«FOREACH this.eContents AS n-»
+ 	«n.getName()-», «n.metaType.toString()»
+ 	--- contents of advice ---
+ 	«LET this.eContents.typeSelect(Advice) AS m-»
+	 	«FOREACH m.eContents AS o-»
+	 		«o.getName()-», «o.metaType.toString()»
+	 	«ENDFOREACH»
+ 	«ENDLET»
+ «ENDFOREACH»
+ «IF wsn::Task.isInstance(this)-»
+ 	wow! It's an instance
+ «ENDIF»
+ «ENDDEFINE»
+ 
+ «DEFINE _sensor FOR wsn::Sensor-»
+ Sensor = "«this.getName()»"
+ Sensor Interface = "«this.interface.getName()»" 	
+ Interface Type = "«this.interface.metaType.toString()»" 
+ «ENDDEFINE»
+ 
+ «DEFINE _aspect FOR wsn::Aspect-»
+ Name = "«this.getName()»" 	
+ Contents of aspects:
+ «FOREACH this.eContents AS n-»
+ 	«n.getName()-», «n.metaType.toString()»
+ 	--- contents of advice ---
+ 	«LET this.eContents.typeSelect(Advice) AS m-»
+	 	«FOREACH m.eContents AS o-»
+	 		«o.getName()-», «o.metaType.toString()»
+	 	«ENDFOREACH»
+ 	«ENDLET»
+ «ENDFOREACH»
+ «ENDDEFINE»
+ 
+
+

@@ -1,0 +1,245 @@
+//Yau, 28th Feb., 2014
+model Tools
+import "PoseidonDiagramModel.dgm";
+
+category Nodes {
+	mode: minimized
+	//icon: "wireless_antenna"
+	
+	node_tool Task {
+        diagram_node: Task
+        icon: "task_16x16"
+        //add_menu_role: "task"
+    }
+    
+    node_tool ActivationProfile {
+        diagram_node: ActivationProfile
+        icon: "profile_16x16"
+    } 
+    
+    node_tool Data {
+        diagram_node: Data
+        icon: "data_16x16"
+        add_menu_role: "data"
+    } 
+ 
+ /*   
+    node_tool Variable {
+        diagram_node: Variable
+        shown_in_add_menu_of: "data" 
+    } 
+*/ 
+    node_tool Sensor {
+        diagram_node: Sensor
+        icon: "sensor_16x16"
+    }
+    
+    node_tool Actuator {
+        diagram_node: Actuator
+        icon: "actuator_16x16"
+    }
+    
+    node_tool Timer {
+        diagram_node: Timer
+        icon: "timer_16x16"
+    }
+    
+    node_tool Cluster {
+        diagram_node: Cluster
+        icon: "cluster_16x16"
+        //add_menu_role: "clusterMember"
+    }
+    
+    node_tool Objectives {
+        diagram_node: Objectives
+        icon: "objectives_16x16"
+    }
+     
+    edge_tool DataLink {
+		diagram_edge: DataLink
+		icon: "data_edge_16x16"
+	}
+	
+	/*
+    edge_tool Messaging {
+		diagram_edge: Messaging
+	}
+	*/
+	
+    edge_tool Sensing {
+		diagram_edge: Sensing
+		icon: "sensor_edge_16x16"
+	}
+	
+	edge_tool Actuating {
+		diagram_edge: Actuating
+		icon: "actuator_edge_16x16"
+	}
+	
+	edge_tool Timing {
+		diagram_edge: Timing
+		icon: "timer_edge_16x16"
+	}
+	
+}//category node
+
+category StateMachine {
+    mode: minimized  
+    //icon: "package"
+    
+	node_tool StateMachine {
+        diagram_node: StateMachine
+    }
+        
+	node_tool State {
+        diagram_node: State
+        add_menu_role: "_state" 
+    }
+   
+    node_tool InitialState {
+        diagram_node: InitialState
+    }
+    
+    node_tool FinalState {
+        diagram_node: FinalState
+    }
+  
+    edge_tool Transition {
+		diagram_edge: Transition
+	}
+}//category state machine
+
+category Activity {
+    mode: minimized  
+    //icon: "package"
+    
+	node_tool Activity {
+        diagram_node: Activity
+    }
+    
+    node_tool InitialNode {
+        diagram_node: InitialNode
+    }
+    
+    node_tool FinalNode {
+        diagram_node: FinalNode
+    }
+    
+    node_tool DecisionNode {
+        diagram_node: DecisionNode
+    }
+    
+    node_tool MergeNode {
+        diagram_node: MergeNode
+    }
+    
+    node_tool SensingAction {
+        diagram_node: SensingAction
+    }
+    
+    node_tool ActuatingAction {
+        diagram_node: ActuatingAction
+    }
+    
+    node_tool TimingAction {
+        diagram_node: TimingAction
+    }
+ 
+ /*   
+    node_tool SendMessageAction {
+        diagram_node: SendMessageAction
+    }
+ */   
+    node_tool UpdatePoolAction {
+        diagram_node: UpdatePoolAction
+    }
+    
+ /*
+    node_tool SubscribeAction {
+        diagram_node: SubscribeAction
+    }
+    
+    node_tool HoodRefreshAction {
+        diagram_node: HoodRefreshAction
+    }
+ */   
+    node_tool GetNodeAction {
+        diagram_node: GetNodeAction
+    }
+    
+    node_tool GetDataAction {
+        diagram_node: GetDataAction
+    }
+    
+    node_tool RemoteTriggerAction {
+        diagram_node: RemoteTriggerAction
+    }
+    
+    node_tool OpaqueAction {
+        diagram_node: OpaqueAction
+    }
+  
+    edge_tool ActivityEdge {
+        diagram_edge: ActivityEdge
+    }
+    
+}//category Activity
+
+category Platform {
+    mode: minimized  
+    //icon: "package"
+    
+	node_tool Aspect {
+        diagram_node: Aspect
+        icon: "state"
+        add_menu_role: "_aspects"
+    }
+    
+    node_tool Pointcut {
+        diagram_node: Pointcut
+        icon: "pointcut_16x16"
+        shown_in_add_menu_of: element "_aspects"
+    }
+    
+    node_tool Advice {
+        diagram_node: Advice
+        icon: "state"
+        shown_in_add_menu_of: element "_aspects"
+        add_menu_role: "_advices"
+    }
+    
+    node_tool PlatformSlot {
+        diagram_node: PlatformSlot
+        icon: "state"
+        add_menu_role: "_slot"
+    }   
+    
+    node_tool Parameters {
+        diagram_node: Parameters
+        icon: "parameter_16x16"
+        shown_in_add_menu_of: element "_slot"
+    }
+    
+    node_tool Runtime {
+        diagram_node: Runtime
+        icon: "runtime_16x16"
+        shown_in_add_menu_of: element "_slot"
+    }
+
+    node_tool Resources {
+        diagram_node: Resources
+        icon: "resource_16x16"
+        shown_in_add_menu_of: element "_slot"
+    }
+    
+    node_tool Battery {
+        diagram_node: Battery
+        icon: "battery_16x16"
+        shown_in_add_menu_of: element "_slot"
+    }
+               
+}//category Platform
+
+ 
+    
+    

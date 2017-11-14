@@ -1,0 +1,105 @@
+// DO NOT MODIFY THIS FILE! This xtext model is generated from your EMF meta-model.
+// Run prepare_metamodel_for_poseidon ant task every time you change your EMF metamodel to re-generate this file!
+
+ecore_element Objectives
+ecore_element Sensor
+ecore_element Actuator
+ecore_element Actuating
+ecore_element Task
+ecore_element Sensing
+ecore_element Node
+ecore_element Event
+ecore_element Network
+ecore_element Communication
+ecore_element Data
+ecore_element State
+ecore_element Transition
+ecore_element InitialState
+ecore_element FinalState
+ecore_element Cluster
+ecore_element ClusterHead
+ecore_element Sink
+ecore_element Activity
+ecore_element StateMachine
+ecore_element Timing
+ecore_element Timer
+ecore_element Platform
+ecore_element Resources
+ecore_element Parameters
+ecore_element Harvester
+ecore_element Battery
+ecore_element Aspect
+ecore_element Pointcut
+ecore_element Advice
+ecore_element ActivityNode
+ecore_element InitialNode
+ecore_element FinalNode
+ecore_element DecisionNode
+ecore_element MergeNode
+ecore_element ActivityEdge
+ecore_element OpaqueAction
+ecore_element SensingAction
+ecore_element ActuatingAction
+ecore_element TimingAction
+ecore_element Variable
+ecore_element DataLink
+ecore_element UpdatePoolAction
+ecore_element GetNodeAction
+ecore_element RemoteTriggerAction
+ecore_element GetDataAction
+ecore_element ActivationProfile
+ecore_element Runtime
+ecore_element PlatformSlot
+ecore_element PlatformElement
+
+ecore_string_attribute "Sensor_id" can_be_called_from="Sensor"
+ecore_string_attribute "Actuator_id" can_be_called_from="Actuator"
+ecore_reference "Actuating_Task" type="Task" can_be_called_from="Actuating" can_store="Task" upper_bound="1" 
+ecore_reference "Actuating_Actuator" type="Actuator" can_be_called_from="Actuating" can_store="Actuator" upper_bound="1" 
+ecore_reference "Task_Behavior" type="StateMachine" can_be_called_from="Task" can_store="StateMachine" upper_bound="1" containment=true
+ecore_reference "Task_Profile" type="ActivationProfile" can_be_called_from="Task" can_store="ActivationProfile" upper_bound="1" 
+ecore_string_attribute "Task_behaviorName" can_be_called_from="Task"
+ecore_string_attribute "Task_activationProfile" can_be_called_from="Task"
+ecore_reference "Sensing_Task" type="Task" can_be_called_from="Sensing" can_store="Task" upper_bound="1" 
+ecore_reference "Sensing_Sensor" type="Sensor" can_be_called_from="Sensing" can_store="Sensor" upper_bound="1" 
+ecore_reference "Node_Task" type="Task" can_be_called_from="Node;ClusterHead;Sink" can_store="Task" upper_bound="10" containment=true
+ecore_reference "Network_Objectives" type="Objectives" can_be_called_from="Network" can_store="Objectives" upper_bound="1" 
+ecore_reference "Network_Nodes" type="Node" can_be_called_from="Network" can_store="Node;ClusterHead;Sink" upper_bound="10" containment=true
+ecore_reference "Communication_CommSource" type="Node" can_be_called_from="Communication" can_store="Node;ClusterHead;Sink" upper_bound="1" 
+ecore_reference "Communication_CommDestination" type="Node" can_be_called_from="Communication" can_store="Node;ClusterHead;Sink" upper_bound="1" 
+ecore_reference "Data_Variable" type="Variable" can_be_called_from="Data" can_store="Variable" upper_bound="-1" containment=true
+ecore_string_attribute "State_entry" can_be_called_from="State;InitialState;FinalState"
+ecore_string_attribute "State_exit" can_be_called_from="State;InitialState;FinalState"
+ecore_reference "Transition_TransitionFrom" type="State" can_be_called_from="Transition" can_store="State;InitialState;FinalState" upper_bound="1" 
+ecore_reference "Transition_TransitionTo" type="State" can_be_called_from="Transition" can_store="State;InitialState;FinalState" upper_bound="1" 
+ecore_reference "Transition_Trigger" type="Event" can_be_called_from="Transition" can_store="Event;Timing" upper_bound="1" 
+ecore_string_attribute "Transition_guard" can_be_called_from="Transition"
+ecore_reference "Cluster_Node" type="Node" can_be_called_from="Cluster" can_store="Node;ClusterHead;Sink" upper_bound="-1" 
+ecore_reference "Cluster_Head" type="ClusterHead" can_be_called_from="Cluster" can_store="ClusterHead;Node" upper_bound="1" containment=true
+ecore_reference "Activity_InitialNode" type="ActivityNode" can_be_called_from="Activity;Advice" can_store="ActivityNode;Action;InitialNode;FinalNode;DecisionNode;MergeNode;OpaqueAction;SensingAction;ActuatingAction;TimingAction;UpdatePoolAction;GetNodeAction;RemoteTriggerAction;GetDataAction" upper_bound="1" containment=true
+ecore_reference "Activity_Edges" type="ActivityEdge" can_be_called_from="Activity;Advice" can_store="ActivityEdge" upper_bound="1" containment=true
+ecore_string_attribute "Activity_in" can_be_called_from="Activity;Advice"
+ecore_string_attribute "Activity_out" can_be_called_from="Activity;Advice"
+ecore_string_attribute "Activity_id" can_be_called_from="Activity;Advice"
+ecore_reference "Timing_Timer" type="Timer" can_be_called_from="Timing" can_store="Timer" upper_bound="1" 
+ecore_reference "Timing_Task" type="Task" can_be_called_from="Timing" can_store="Task" upper_bound="1" 
+ecore_reference "Platform_Aspect" type="Aspect" can_be_called_from="Platform" can_store="Aspect" upper_bound="1" containment=true
+ecore_reference "Platform_Slot" type="PlatformSlot" can_be_called_from="Platform" can_store="PlatformSlot" upper_bound="1" containment=true
+ecore_reference "Aspect_Pointcut" type="Pointcut" can_be_called_from="Aspect" can_store="Pointcut" upper_bound="1" containment=true
+ecore_reference "Aspect_Advice" type="Advice" can_be_called_from="Aspect" can_store="Advice;Activity" upper_bound="1" containment=true
+ecore_string_attribute "Pointcut_expression" can_be_called_from="Pointcut"
+ecore_reference "ActivityEdge_Source" type="ActivityNode" can_be_called_from="ActivityEdge" can_store="ActivityNode;Action;InitialNode;FinalNode;DecisionNode;MergeNode;OpaqueAction;SensingAction;ActuatingAction;TimingAction;UpdatePoolAction;GetNodeAction;RemoteTriggerAction;GetDataAction" upper_bound="1" 
+ecore_reference "ActivityEdge_Target" type="ActivityNode" can_be_called_from="ActivityEdge" can_store="ActivityNode;Action;InitialNode;FinalNode;DecisionNode;MergeNode;OpaqueAction;SensingAction;ActuatingAction;TimingAction;UpdatePoolAction;GetNodeAction;RemoteTriggerAction;GetDataAction" upper_bound="1" 
+ecore_string_attribute "OpaqueAction_code" can_be_called_from="OpaqueAction"
+ecore_string_attribute "OpaqueAction_file" can_be_called_from="OpaqueAction"
+ecore_string_attribute "SensingAction_sensorId" can_be_called_from="SensingAction"
+ecore_string_attribute "SensingAction_data" can_be_called_from="SensingAction"
+ecore_string_attribute "ActuatingAction_actuatorId" can_be_called_from="ActuatingAction"
+ecore_string_attribute "ActuatingAction_data" can_be_called_from="ActuatingAction"
+ecore_reference "DataLink_Task" type="Task" can_be_called_from="DataLink" can_store="Task" upper_bound="1" 
+ecore_reference "DataLink_Data" type="Data" can_be_called_from="DataLink" can_store="Data" upper_bound="1" 
+ecore_string_attribute "GetNodeAction_query" can_be_called_from="GetNodeAction"
+ecore_string_attribute "GetDataAction_query" can_be_called_from="GetDataAction"
+ecore_reference "PlatformSlot_Element" type="PlatformElement" can_be_called_from="PlatformSlot" can_store="PlatformElement;Resources;Parameters;EnergySource;Harvester;Battery;Runtime" upper_bound="1" 
+
+

@@ -1,0 +1,15 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FILE "project-conf.h"»
+#define NETSTACK_CONF_NETWORK  	rime_driver
+#define NETSTACK_CONF_MAC		csma_driver
+#define NETSTACK_CONF_RDC		contikimac_driver
+#define SLEEP_CONF				1
+
+«ENDFILE»
+«ENDDEFINE»
+-------------------------------------------------------
+
+

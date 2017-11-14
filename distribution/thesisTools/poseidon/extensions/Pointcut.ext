@@ -1,0 +1,14 @@
+import dsl;
+import wsn;
+
+String getName(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getName(java.lang.Object);
+	
+List getOutgoingRelationships(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getOutgoings(java.lang.Object);	
+	
+List getIncomingRelationships(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getIncomings(java.lang.Object);
+	
+//List getAdvices(PoseidonCoreRootElement m):	
+	

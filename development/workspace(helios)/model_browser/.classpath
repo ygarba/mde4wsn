@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/graphics"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/repository"/>
+	<classpathentry kind="lib" path="lib/jide-oss-2.8.2.jar" sourcepath="lib/jide-oss-src-2.8.2.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/RepositoryBrowser.jar"/>
+	<classpathentry kind="lib" path="/resources/lib/Utilities.jar"/>
+	<classpathentry kind="src" path="/metamodel"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

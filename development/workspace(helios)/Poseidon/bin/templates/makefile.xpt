@@ -1,0 +1,46 @@
+«IMPORT dsl»
+«IMPORT wsn»
+«EXTENSION extensions::MetamodelHelper»
+«DEFINE main FOR dsl::PoseidonCoreRootElement»
+«FILE "Makefile"»
+ifndef TARGET
+TARGET=z1
+endif
+
+CONTIKI_PROJECT = wsnApp
+
+CONTIKI_SOURCEFILES += qepn.c runtime.c wsn.c neighbors_facts.c neighbors_data.c
+#tasks
+«FOREACH __ownedMember.typeSelect(wsn::Task) AS e-»
+CONTIKI_SOURCEFILES += task_«e.getName()».c
+«ENDFOREACH-»
+#sensor drivers
+«FOREACH __ownedMember.typeSelect(wsn::Sensor) AS s-»
+CONTIKI_SOURCEFILES += «s.id.toLowerCase()».c
+«ENDFOREACH-»
+#actuator drivers
+«FOREACH __ownedMember.typeSelect(wsn::Actuator) AS a-»
+CONTIKI_SOURCEFILES += «a.id.toLowerCase()».c
+«ENDFOREACH-»
+«FOREACH __ownedMember.typeSelect(wsn::Cluster) AS c-»
+ CONTIKI_SOURCEFILES += cluster.c	#add clustering src (only if cluster is modeled)
+«ENDFOREACH-»
+
+ifeq ($(opt), 1)
+    CONTIKI_SOURCEFILES += optimization.c
+ 	APPS+=powertrace
+endif
+
+all: $(CONTIKI_PROJECT)
+
+CONTIKI = ../..
+CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
+CFLAGS += -DWSNSIM=$(sim)
+CFLAGS += -DWSNOPT=$(opt)
+
+include $(CONTIKI)/Makefile.include
+«ENDFILE»
+«ENDDEFINE»
+-------------------------------------------------------
+
+

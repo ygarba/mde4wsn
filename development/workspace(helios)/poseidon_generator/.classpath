@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/org.antlr.runtime_3.0.0.v200908120607.jar"/>
+	<classpathentry kind="lib" path="lib/org.apache.commons.cli_1.0.0.v20080604-1500.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.mwe.activities_1.0.0.v201008251122.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.emf.mwe.core_1.0.0.v201008251122.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.mwe.ui_1.0.0.v201008251122.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.mwe.ui.simpleEditor_1.0.0.v201008251122.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.mwe.utils_1.0.0.v201008251122.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xpand_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.check.ui_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.shared.ui_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.typesystem.emf_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.typesystem.emf.ui_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.typesystem.uml2_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.typesystem.uml2.ui_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.typesystem.xsd_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.typesystem.xsd.ui_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.ui_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.xtend.util.stdlib_1.0.1.v201008251147.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.mwe2.runtime_1.0.1.v201008251113.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/repository"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/generators"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

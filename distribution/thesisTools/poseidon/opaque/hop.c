@@ -1,0 +1,1 @@
+self_hop = hop + 1;

@@ -1,0 +1,15 @@
+import dsl;
+import wsn;
+
+String getName(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getName(java.lang.Object);
+	
+List getOutgoingRelationships(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getOutgoings(java.lang.Object);	
+	
+List getIncomingRelationships(Object object):
+	JAVA com.gentleware.poseidon.repository.SemanticElementManager.getIncomings(java.lang.Object);
+	
+PoseidonCoreRootElement m2mComposition(PoseidonCoreRootElement m, List activity, List aspect):
+	JAVA com.yau.phd.M2M.Composition(com.gentleware.poseidon.dsl.PoseidonCoreRootElement, java.util.List, java.util.List);
+	
